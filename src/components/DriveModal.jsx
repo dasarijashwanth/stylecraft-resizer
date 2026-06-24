@@ -33,7 +33,7 @@ export default function DriveModal({
     // Simulate google authorization flow
     setStage('syncing');
     setTimeout(() => {
-      setAccount('stylecraft.user@gmail.com');
+      setAccount('jashwanthd@stylecraftus.com');
       setStage('folders');
     }, 1500);
   };

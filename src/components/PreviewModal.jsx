@@ -129,6 +129,7 @@ export default function PreviewModal({
     const activeFormat = exportFormat;
     const activeQuality = documentMode ? 1.0 : quality;
     const baseName = imageElement.src.substring(imageElement.src.lastIndexOf('/') + 1).split('.')[0] || 'resized';
+    const outputName = size.filename || `${baseName}_${size.width}x${size.height}`;
 
     try {
       const canvas = resizeImage(imageElement, size.width, size.height, bgType, bgColor, ultraClarity, clarityEngine, aiStyle, aiPrompt);
@@ -137,7 +138,7 @@ export default function PreviewModal({
       if (activeFormat === 'application/msword') {
         const pngBlob = await canvasToBlob(canvas, 'image/png');
         const docBlob = await imageToDocBlob(pngBlob, size.name, size.width, size.height);
-        saveAs(docBlob, `${baseName}_${size.width}x${size.height}.doc`);
+        saveAs(docBlob, `${outputName}.doc`);
       } else {
         const blob = await canvasToBlob(canvas, activeFormat, activeQuality);
         const mimeToExt = {
@@ -146,7 +147,7 @@ export default function PreviewModal({
           'image/webp': 'webp',
         };
         const ext = mimeToExt[activeFormat] || 'png';
-        saveAs(blob, `${baseName}_${size.width}x${size.height}.${ext}`);
+        saveAs(blob, `${outputName}.${ext}`);
       }
     } catch (err) {
       console.error(err);

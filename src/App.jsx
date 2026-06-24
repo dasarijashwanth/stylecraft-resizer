@@ -360,11 +360,12 @@ export default function App() {
       if (!canvas) throw new Error('Canvas render failed');
 
       const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || 'image';
+      const outputName = size.filename || `${baseName}_${size.width}x${size.height}`;
 
       if (activeFormat === 'application/msword') {
         const pngBlob = await canvasToBlob(canvas, 'image/png');
         const docBlob = await imageToDocBlob(pngBlob, size.name, size.width, size.height);
-        saveAs(docBlob, `${baseName}_${size.width}x${size.height}.doc`);
+        saveAs(docBlob, `${outputName}.doc`);
       } else {
         const blob = await canvasToBlob(canvas, activeFormat, activeQuality);
         const mimeToExt = {
@@ -373,7 +374,7 @@ export default function App() {
           'image/webp': 'webp',
         };
         const ext = mimeToExt[activeFormat] || 'png';
-        saveAs(blob, `${baseName}_${size.width}x${size.height}.${ext}`);
+        saveAs(blob, `${outputName}.${ext}`);
       }
 
       // Increment resizes count metrics
@@ -426,14 +427,15 @@ export default function App() {
         
         // Render high-res canvas
         const canvas = resizeImage(imageElement, size.width, size.height, bgType, bgColor, ultraClarity, clarityEngine, aiStyle, aiPrompt);
+        const outputName = size.filename || `${size.id}_${size.width}x${size.height}`;
         if (canvas) {
           if (activeFormat === 'application/msword') {
             const pngBlob = await canvasToBlob(canvas, 'image/png');
             const docBlob = await imageToDocBlob(pngBlob, size.name, size.width, size.height);
-            zip.file(`${size.category}/${size.id}_${size.width}x${size.height}.doc`, docBlob);
+            zip.file(`${size.category}/${outputName}.doc`, docBlob);
           } else {
             const blob = await canvasToBlob(canvas, activeFormat, activeQuality);
-            zip.file(`${size.category}/${size.id}_${size.width}x${size.height}.${ext}`, blob);
+            zip.file(`${size.category}/${outputName}.${ext}`, blob);
           }
         }
 

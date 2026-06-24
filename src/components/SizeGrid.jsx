@@ -10,6 +10,8 @@ export default function SizeGrid({
   onToggleSelect,
   onDownload,
   onPreview,
+  onSaveToDrive,
+  savingToDriveIds = new Set(),
   isGenerating,
   ultraClarity,
 }) {
@@ -45,6 +47,8 @@ export default function SizeGrid({
                     onToggleSelect={() => onToggleSelect(size.id)}
                     onDownload={onDownload}
                     onPreview={onPreview}
+                    onSaveToDrive={onSaveToDrive}
+                    isSavingToDrive={savingToDriveIds.has(size.id)}
                     isGenerating={isGenerating}
                     ultraClarity={ultraClarity}
                   />

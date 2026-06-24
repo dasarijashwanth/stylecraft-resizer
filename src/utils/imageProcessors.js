@@ -535,3 +535,89 @@ export function imageToDocBlob(imageBlob, sizeName, width, height) {
     reader.readAsDataURL(imageBlob);
   });
 }
+
+/**
+ * Helper to convert Blob data to Base64 format client-side.
+ */
+export function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result.split(',')[1];
+      resolve(base64String);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+/**
+ * Uploads a file blob to the user's Google Drive using the Drive API v3 multipart upload endpoint.
+ * POST https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart
+ */
+export async function uploadBlobToGoogleDrive(accessToken, blob, filename, mimeType) {
+  try {
+    const base64Data = await blobToBase64(blob);
+    const metadata = {
+      name: filename,
+      mimeType: mimeType
+    };
+
+    const boundary = '314159265358979323846';
+    const delimiter = `\r\n--${boundary}\r\n`;
+    const close_delim = `\r\n--${boundary}--`;
+
+    const body = 
+      delimiter +
+      'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+      JSON.stringify(metadata) +
+      delimiter +
+      `Content-Type: ${mimeType}\r\n` +
+      'Content-Transfer-Encoding: base64\r\n\r\n' +
+      base64Data +
+      close_delim;
+
+    const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': `multipart/related; boundary=${boundary}`,
+      },
+      body: body
+    });
+
+    const data = await response.json();
+    console.log("Google Drive Upload API Response:", data);
+    
+    if (!response.ok) {
+      throw new Error(data.error?.message || 'Upload failed');
+    }
+
+    if (!data.id) {
+      throw new Error('Upload succeeded but no file ID was returned by Google Drive API.');
+    }
+
+    return data; // contains id, name, mimeType, etc.
+  } catch (err) {
+    console.error("uploadBlobToGoogleDrive error details:", err);
+    throw err;
+  }
+}
+
+/**
+ * Fetches user profile information using the Google OAuth UserInfo API.
+ * GET https://www.googleapis.com/oauth2/v3/userinfo
+ */
+export async function fetchGoogleUserInfo(accessToken) {
+  const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+    headers: {
+      'Authorization': `Bearer ${accessToken}`
+    }
+  });
+  const data = await response.json();
+  console.log("Google UserInfo API Response:", data);
+  if (!response.ok) {
+    throw new Error(data.error_description || data.error?.message || 'Failed to fetch user info');
+  }
+  return data; // contains name, email, picture, etc.
+}

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, ZoomIn, ZoomOut, Download, Move, ShieldCheck } from 'lucide-react';
+import { X, ZoomIn, ZoomOut, Download, Move, ShieldCheck, Cloud } from 'lucide-react';
 import { resizeImage, canvasToBlob, imageToDocBlob } from '../utils/imageProcessors';
 import { saveAs } from 'file-saver';
 
@@ -37,6 +37,8 @@ export default function PreviewModal({
   aiStyle = 'mirror',
   aiPrompt = '',
   onClose,
+  onSaveToDrive,
+  isSavingToDrive = false,
 }) {
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -299,6 +301,19 @@ export default function PreviewModal({
                 <ZoomIn className="h-4 w-4" />
               </button>
             </div>
+
+            <button
+              onClick={() => onSaveToDrive(size)}
+              disabled={isLoading || isSavingToDrive}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-650 hover:bg-emerald-600 text-white font-semibold text-xs cursor-pointer shadow-md shadow-emerald-500/10 hover:shadow-emerald-500/20 disabled:opacity-40 transition-all select-none w-full sm:w-auto justify-center"
+            >
+              {isSavingToDrive ? (
+                <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Cloud className="h-4 w-4" />
+              )}
+              {isSavingToDrive ? 'Saving...' : 'Save to Drive'}
+            </button>
 
             <button
               onClick={handleDownload}

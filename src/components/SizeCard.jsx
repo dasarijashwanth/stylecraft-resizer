@@ -1,5 +1,5 @@
 import React from 'react';
-import { Download, Check, ShieldCheck, Eye } from 'lucide-react';
+import { Download, Check, ShieldCheck, Eye, Cloud } from 'lucide-react';
 import { formatBytes } from '../utils/imageProcessors';
 
 export default function SizeCard({
@@ -10,6 +10,8 @@ export default function SizeCard({
   onToggleSelect,
   onDownload,
   onPreview,
+  onSaveToDrive,
+  isSavingToDrive = false,
   isGenerating,
   ultraClarity = true,
 }) {
@@ -112,6 +114,28 @@ export default function SizeCard({
               aria-label="Preview size"
             >
               <Eye className="h-3.5 w-3.5" />
+            </button>
+
+            {/* Save to Drive Button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation(); // Avoid checkbox toggle
+                onSaveToDrive(size);
+              }}
+              disabled={isGenerating || !previewSrc || isSavingToDrive}
+              className={`p-2 rounded-xl flex items-center justify-center cursor-pointer transition-all duration-200 ${
+                isGenerating || !previewSrc || isSavingToDrive
+                  ? 'bg-zinc-150 dark:bg-zinc-850 text-zinc-450 dark:text-zinc-650 cursor-not-allowed'
+                  : 'bg-zinc-50 hover:bg-emerald-50 text-zinc-700 hover:text-emerald-650 dark:bg-zinc-850 dark:hover:bg-emerald-950/40 dark:text-zinc-300 dark:hover:text-emerald-400 border border-zinc-200/50 hover:border-emerald-100 dark:border-zinc-800 dark:hover:border-emerald-900/40'
+              }`}
+              title={isSavingToDrive ? "Saving to Google Drive..." : "Save to Google Drive"}
+              aria-label="Save to Google Drive"
+            >
+              {isSavingToDrive ? (
+                <div className="w-3.5 h-3.5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Cloud className="h-3.5 w-3.5" />
+              )}
             </button>
 
             {/* Download Button */}

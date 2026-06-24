@@ -14,6 +14,7 @@ import PreviewModal from './components/PreviewModal';
 import LoginModal from './components/LoginModal'; // Authentication Modal
 import AdminPanel from './components/AdminPanel'; // Admin Custom Presets
 import DriveModal from './components/DriveModal'; // Google Drive cloud modal
+import GoogleClientIdModal from './components/GoogleClientIdModal'; // Google API config modal
 
 import { SIZES } from './constants/sizes';
 import {
@@ -22,6 +23,8 @@ import {
   canvasToBlob,
   estimateFileSize,
   imageToDocBlob,
+  uploadBlobToGoogleDrive,
+  fetchGoogleUserInfo,
 } from './utils/imageProcessors';
 
 /**
@@ -106,6 +109,15 @@ export default function App() {
 
   // UI Notification & Theme
   const [toast, setToast] = useState(null);
+
+  // Google OAuth States
+  const [googleAccessToken, setGoogleAccessToken] = useState('');
+  const [googleUser, setGoogleUser] = useState(null);
+  const [googleClientId, setGoogleClientId] = useState(() => {
+    return localStorage.getItem('google_client_id') || '';
+  });
+  const [showGoogleConfigModal, setShowGoogleConfigModal] = useState(false);
+  const [savingToDriveIds, setSavingToDriveIds] = useState(new Set());
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('theme');
     if (saved) return saved === 'dark';
@@ -136,6 +148,169 @@ export default function App() {
       }
     };
   }, [imageSrc]);
+
+  // Google Auth Handlers
+  const triggerGoogleLoginWithId = (clientId) => {
+    if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
+      setToast({
+        message: 'Google Identity Services script not loaded. Please wait.',
+        type: 'error',
+      });
+      return;
+    }
+
+    try {
+      const client = google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: 'https://www.googleapis.com/auth/drive.file',
+        callback: async (tokenResponse) => {
+          if (tokenResponse.error) {
+            console.error("GSI OAuth Error:", tokenResponse);
+            setToast({
+              message: `Authentication failed: ${tokenResponse.error_description || tokenResponse.error}`,
+              type: 'error',
+            });
+            return;
+          }
+
+          if (tokenResponse.access_token) {
+            setGoogleAccessToken(tokenResponse.access_token);
+            setToast({
+              message: 'Google Sign-in successful!',
+              type: 'success',
+            });
+
+            try {
+              const userInfo = await fetchGoogleUserInfo(tokenResponse.access_token);
+              setGoogleUser(userInfo);
+            } catch (err) {
+              console.error("Failed to fetch user info:", err);
+              setGoogleUser({ name: 'Google Drive Connected' });
+            }
+          }
+        },
+      });
+
+      client.requestAccessToken({ prompt: 'consent' });
+    } catch (err) {
+      console.error("Error initializing GSI client:", err);
+      setToast({
+        message: `Failed to initialize Google Login: ${err.message || err}`,
+        type: 'error',
+      });
+    }
+  };
+
+  const handleGoogleLogin = () => {
+    if (!googleClientId) {
+      setShowGoogleConfigModal(true);
+      return;
+    }
+    triggerGoogleLoginWithId(googleClientId);
+  };
+
+  const handleGoogleLogout = () => {
+    setGoogleAccessToken('');
+    setGoogleUser(null);
+    setToast({
+      message: 'Disconnected from Google Drive.',
+      type: 'success',
+    });
+  };
+
+  const handleGoogleConfigSave = (clientId) => {
+    localStorage.setItem('google_client_id', clientId);
+    setGoogleClientId(clientId);
+    setShowGoogleConfigModal(false);
+    
+    // Auto-trigger sign-in after saving Client ID
+    setTimeout(() => {
+      triggerGoogleLoginWithId(clientId);
+    }, 100);
+  };
+
+  const handleSaveToDriveSingle = async (size) => {
+    // If the user is not signed in and clicks "Save to Drive", prompt them to sign in first.
+    if (!googleAccessToken) {
+      setToast({
+        message: 'Please sign in with Google first.',
+        type: 'error',
+      });
+      handleGoogleLogin();
+      return;
+    }
+
+    if (!imageElement) return;
+
+    // Set this size as saving to Drive
+    setSavingToDriveIds(prev => {
+      const next = new Set(prev);
+      next.add(size.id);
+      return next;
+    });
+
+    try {
+      // Yield thread
+      await new Promise((r) => setTimeout(r, 50));
+
+      const activeFormat = exportFormat;
+      const activeQuality = documentMode ? 1.0 : quality;
+
+      const canvas = resizeImage(imageElement, size.width, size.height, bgType, bgColor, ultraClarity, clarityEngine, aiStyle, aiPrompt);
+      if (!canvas) throw new Error('Canvas render failed');
+
+      const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || 'image';
+      const outputName = size.filename || `${baseName}_${size.width}x${size.height}`;
+
+      let fileBlob;
+      let finalFilename;
+      let mimeType;
+
+      if (activeFormat === 'application/msword') {
+        const pngBlob = await canvasToBlob(canvas, 'image/png');
+        fileBlob = await imageToDocBlob(pngBlob, size.name, size.width, size.height);
+        finalFilename = `${outputName}.doc`;
+        mimeType = 'application/msword';
+      } else {
+        fileBlob = await canvasToBlob(canvas, activeFormat, activeQuality);
+        const mimeToExt = {
+          'image/png': 'png',
+          'image/jpeg': 'jpg',
+          'image/webp': 'webp',
+        };
+        const ext = mimeToExt[activeFormat] || 'png';
+        finalFilename = `${outputName}.${ext}`;
+        mimeType = activeFormat;
+      }
+
+      // Perform real upload to Google Drive
+      const uploadResult = await uploadBlobToGoogleDrive(googleAccessToken, fileBlob, finalFilename, mimeType);
+
+      if (uploadResult && uploadResult.id) {
+        // Show success toast with clickable link
+        setToast({
+          message: `Saved! Open in Drive →`,
+          type: 'success',
+          link: `https://drive.google.com/file/d/${uploadResult.id}/view`,
+        });
+      } else {
+        throw new Error('Upload succeeded but no file ID was returned by Google Drive.');
+      }
+    } catch (err) {
+      console.error(err);
+      setToast({
+        message: `Upload failed: ${err.message || err}`,
+        type: 'error',
+      });
+    } finally {
+      // Clear saving state
+      setSavingToDriveIds(prev => {
+        const next = new Set(prev);
+        next.delete(size.id);
+        return next;
+      });
+    }
+  };
 
   // Handle source file upload
   const handleImageUpload = (uploadedFile) => {
@@ -554,6 +729,10 @@ export default function App() {
         onLogout={handleLogout}
         showAdminPanel={showAdminPanel}
         setShowAdminPanel={setShowAdminPanel}
+        googleUser={googleUser}
+        onGoogleLoginClick={handleGoogleLogin}
+        onGoogleLogout={handleGoogleLogout}
+        onGoogleConfigClick={() => setShowGoogleConfigModal(true)}
       />
 
       <main className="flex-1 w-full flex flex-col pt-4">
@@ -674,6 +853,8 @@ export default function App() {
               onToggleSelect={handleToggleSelect}
               onDownload={handleDownloadSingle}
               onPreview={setPreviewSizeItem} // Connect preview modal
+              onSaveToDrive={handleSaveToDriveSingle}
+              savingToDriveIds={savingToDriveIds}
               isGenerating={isProcessing}
               ultraClarity={ultraClarity}
             />
@@ -696,6 +877,8 @@ export default function App() {
           aiStyle={aiStyle}
           aiPrompt={aiPrompt}
           onClose={() => setPreviewSizeItem(null)}
+          onSaveToDrive={handleSaveToDriveSingle}
+          isSavingToDrive={savingToDriveIds.has(previewSizeItem.id)}
         />
       )}
 
@@ -704,6 +887,15 @@ export default function App() {
         <LoginModal
           onLogin={handleLogin}
           onClose={() => setShowLoginModal(false)}
+        />
+      )}
+
+      {/* Google API Client ID Setup Modal */}
+      {showGoogleConfigModal && (
+        <GoogleClientIdModal
+          initialClientId={googleClientId}
+          onSave={handleGoogleConfigSave}
+          onClose={() => setShowGoogleConfigModal(false)}
         />
       )}
 

@@ -30,9 +30,22 @@ export default function Toast({ toast, onClose }) {
           <CheckCircle2 className="h-5 w-5 text-emerald-550 dark:text-emerald-400 shrink-0" />
         )}
         
-        <p className="text-sm font-medium pr-2 truncate max-w-[240px]" title={message}>
-          {message}
-        </p>
+        <div className="text-sm font-medium pr-2 max-w-[240px]">
+          {toast.link ? (
+            <a
+              href={toast.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline font-semibold hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+            >
+              {message}
+            </a>
+          ) : (
+            <p className="truncate" title={message}>
+              {message}
+            </p>
+          )}
+        </div>
 
         <button
           onClick={onClose}

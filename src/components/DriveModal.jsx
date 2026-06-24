@@ -8,6 +8,7 @@ export default function DriveModal({
   isProcessing,
   progressCount,
   progressTotal,
+  onDownloadZIP,
 }) {
   const [stage, setStage] = useState('connect'); // 'connect' | 'folders' | 'syncing' | 'success'
   const [account, setAccount] = useState(null);
@@ -240,20 +241,31 @@ export default function DriveModal({
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 w-full mt-3">
-                <button
-                  onClick={() => setStage('folders')}
-                  className="py-2.5 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-850 text-zinc-700 dark:text-zinc-300 text-xs font-bold rounded-xl cursor-pointer flex items-center justify-center gap-1"
+              <div className="flex flex-col gap-2 w-full mt-3">
+                <a
+                  href="https://drive.google.com/drive/my-drive"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl cursor-pointer flex items-center justify-center gap-1.5 shadow-md shadow-blue-500/10 text-center"
                 >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  Sync Again
-                </button>
-                <button
-                  onClick={onClose}
-                  className="py-2.5 bg-zinc-900 hover:bg-zinc-850 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 text-xs font-bold rounded-xl cursor-pointer"
-                >
-                  Done
-                </button>
+                  <Cloud className="w-4 h-4" />
+                  Open Google Drive Folder
+                </a>
+                
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={onDownloadZIP}
+                    className="py-2.5 border border-zinc-250 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-850 text-zinc-700 dark:text-zinc-300 text-xs font-bold rounded-xl cursor-pointer flex items-center justify-center gap-1"
+                  >
+                    Download Local ZIP
+                  </button>
+                  <button
+                    onClick={onClose}
+                    className="py-2.5 bg-zinc-900 hover:bg-zinc-850 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 text-xs font-bold rounded-xl cursor-pointer"
+                  >
+                    Done
+                  </button>
+                </div>
               </div>
             </div>
           )}

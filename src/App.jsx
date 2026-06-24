@@ -695,6 +695,7 @@ export default function App() {
           isProcessing={isProcessing}
           progressCount={progressCount}
           progressTotal={progressTotal}
+          onDownloadZIP={handleDownloadZIP}
         />
       )}
 

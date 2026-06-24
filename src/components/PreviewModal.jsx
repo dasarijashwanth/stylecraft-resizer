@@ -3,6 +3,27 @@ import { X, ZoomIn, ZoomOut, Download, Move, ShieldCheck } from 'lucide-react';
 import { resizeImage, canvasToBlob, imageToDocBlob } from '../utils/imageProcessors';
 import { saveAs } from 'file-saver';
 
+/**
+ * A highly reliable native browser download trigger.
+ * Bypasses iframe / pop-up sandboxing restrictions by programmatically
+ * clicking a temporary document anchor element, falling back to file-saver.
+ */
+function triggerDownload(blob, filename) {
+  try {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error("Native download helper failed, falling back to file-saver:", err);
+    saveAs(blob, filename);
+  }
+}
+
 export default function PreviewModal({
   size,
   imageElement,
@@ -138,7 +159,7 @@ export default function PreviewModal({
       if (activeFormat === 'application/msword') {
         const pngBlob = await canvasToBlob(canvas, 'image/png');
         const docBlob = await imageToDocBlob(pngBlob, size.name, size.width, size.height);
-        saveAs(docBlob, `${outputName}.doc`);
+        triggerDownload(docBlob, `${outputName}.doc`);
       } else {
         const blob = await canvasToBlob(canvas, activeFormat, activeQuality);
         const mimeToExt = {
@@ -147,7 +168,7 @@ export default function PreviewModal({
           'image/webp': 'webp',
         };
         const ext = mimeToExt[activeFormat] || 'png';
-        saveAs(blob, `${outputName}.${ext}`);
+        triggerDownload(blob, `${outputName}.${ext}`);
       }
     } catch (err) {
       console.error(err);

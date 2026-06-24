@@ -24,6 +24,27 @@ import {
   imageToDocBlob,
 } from './utils/imageProcessors';
 
+/**
+ * A highly reliable native browser download trigger.
+ * Bypasses iframe / pop-up sandboxing restrictions by programmatically
+ * clicking a temporary document anchor element, falling back to file-saver.
+ */
+function triggerDownload(blob, filename) {
+  try {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error("Native download helper failed, falling back to file-saver:", err);
+    saveAs(blob, filename);
+  }
+}
+
 export default function App() {
   // App Image Upload States
   const [file, setFile] = useState(null);
@@ -36,11 +57,11 @@ export default function App() {
   const [bgColor, setBgColor] = useState('#ffffff');
   const [aiStyle, setAiStyle] = useState('mirror'); // 'mirror' | 'ambient' | 'gilded' | 'neon'
   const [aiPrompt, setAiPrompt] = useState('matte film noise, dark luxury grain');
-  const [exportFormat, setExportFormat] = useState('image/png'); // 'image/png' | 'image/jpeg' | 'image/webp' | 'application/msword'
+  const [exportFormat, setExportFormat] = useState('image/jpeg'); // Default to image/jpeg
   const [quality, setQuality] = useState(0.95);
   
   // Clarity and Document mode additions
-  const [documentMode, setDocumentMode] = useState(true); // Default to true to force lossless raw downloading
+  const [documentMode, setDocumentMode] = useState(false); // Default to false so image output is standard
   const [ultraClarity, setUltraClarity] = useState(true); // Default to true to force high-quality bicubic smoothing
   const [clarityEngine, setClarityEngine] = useState('hermite'); // Default to Hermite resampling filter for sharpness
   
@@ -365,7 +386,7 @@ export default function App() {
       if (activeFormat === 'application/msword') {
         const pngBlob = await canvasToBlob(canvas, 'image/png');
         const docBlob = await imageToDocBlob(pngBlob, size.name, size.width, size.height);
-        saveAs(docBlob, `${outputName}.doc`);
+        triggerDownload(docBlob, `${outputName}.doc`);
       } else {
         const blob = await canvasToBlob(canvas, activeFormat, activeQuality);
         const mimeToExt = {
@@ -374,7 +395,7 @@ export default function App() {
           'image/webp': 'webp',
         };
         const ext = mimeToExt[activeFormat] || 'png';
-        saveAs(blob, `${outputName}.${ext}`);
+        triggerDownload(blob, `${outputName}.${ext}`);
       }
 
       // Increment resizes count metrics
@@ -447,7 +468,7 @@ export default function App() {
       setStatusMessage('Creating ZIP file download archive...');
       const zipContent = await zip.generateAsync({ type: 'blob' });
       
-      saveAs(zipContent, `${baseName}_resized_document_package.zip`);
+      triggerDownload(zipContent, `${baseName}_resized_document_package.zip`);
       setSimulatedResizesCount((c) => c + selectedList.length);
 
       setToast({

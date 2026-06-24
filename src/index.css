@@ -1,0 +1,236 @@
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  body {
+    transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    background-color: #030303;
+    color: #f4f4f5;
+    overflow-x: hidden;
+    position: relative;
+  }
+}
+
+/* Custom premium transitions & animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes gradientFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Float animation for background glow orbs */
+@keyframes floatSlow {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.08);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.93);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+@keyframes floatSlowReverse {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  50% {
+    transform: translate(-40px, 40px) scale(1.1);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+/* Glowing Neon Shifting borders */
+@keyframes neonPulseGold {
+  0%, 100% {
+    border-color: rgba(212, 175, 55, 0.25);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.05), inset 0 0 15px rgba(212, 175, 55, 0.02);
+  }
+  50% {
+    border-color: rgba(250, 204, 21, 0.7);
+    box-shadow: 0 0 30px rgba(250, 204, 21, 0.25), inset 0 0 20px rgba(250, 204, 21, 0.05);
+  }
+}
+
+@keyframes neonPulseIndigo {
+  0%, 100% {
+    border-color: rgba(99, 102, 241, 0.25);
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.05);
+  }
+  50% {
+    border-color: rgba(139, 92, 246, 0.7);
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.25);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slideIn {
+  animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Floating Ambient Orbs */
+.ambient-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(140px);
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.45;
+  transition: all 0.5s ease;
+}
+
+.ambient-orb-gold {
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.3) 0%, rgba(212, 175, 55, 0) 70%);
+  animation: floatSlow 20s infinite ease-in-out;
+}
+
+.ambient-orb-purple {
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.25) 0%, rgba(168, 85, 247, 0) 70%);
+  animation: floatSlowReverse 25s infinite ease-in-out;
+}
+
+.ambient-orb-rose {
+  background: radial-gradient(circle, rgba(244, 63, 94, 0.2) 0%, rgba(244, 63, 94, 0) 70%);
+  animation: floatSlow 18s infinite ease-in-out;
+}
+
+/* Premium Technical Grid Background */
+.bg-grid-tech {
+  background-image: linear-gradient(rgba(212, 175, 55, 0.02) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(212, 175, 55, 0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: center;
+}
+
+/* Gold Gradient text styling */
+.text-gradient-gold {
+  background: linear-gradient(90deg, #e5c060, #facc15, #f39c12, #e5c060);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientFlow 4s linear infinite;
+}
+
+.text-gradient-neon {
+  background: linear-gradient(90deg, #facc15, #ec4899, #3b82f6, #facc15);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientFlow 6s linear infinite;
+}
+
+/* Premium Glowing Card Hover Effects */
+.hover-rainbow-card {
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  background: rgba(15, 15, 18, 0.6) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.hover-rainbow-card:hover {
+  animation: neonPulseGold 3s linear infinite;
+  transform: translateY(-6px) scale(1.015);
+  background: rgba(22, 22, 28, 0.8) !important;
+}
+
+/* Glowing Neon buttons */
+.btn-glow-gold {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-glow-gold::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.btn-glow-gold:hover {
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.45);
+  transform: translateY(-2px);
+}
+
+.btn-glow-gold:hover::after {
+  transform: translateX(100%);
+}
+
+.btn-glow-indigo {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-glow-indigo:hover {
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.45);
+  transform: translateY(-2px);
+}
+
+/* AI Configuration glowing border panel */
+.ai-panel-glow {
+  animation: neonPulseIndigo 4s linear infinite;
+  background: rgba(9, 9, 11, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Custom Scrollbar for premium dark styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #030303;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 9999px;
+  border: 2px solid #030303;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #d4af37;
+}

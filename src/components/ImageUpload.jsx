@@ -22,8 +22,8 @@ export default function ImageUpload({ onImageUpload }) {
       alert('Unsupported file format. Please upload JPG or PNG.');
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Image file size must be less than 5 MB.');
+    if (file.size > 30 * 1024 * 1024) {
+      alert('Image file size must be less than 30 MB.');
       return;
     }
     onImageUpload(file);
@@ -95,7 +95,7 @@ export default function ImageUpload({ onImageUpload }) {
 
           <div className="mt-2 flex flex-wrap items-center justify-center gap-2 text-xs text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-900 px-4 py-2 rounded-xl border border-zinc-100 dark:border-zinc-850">
             <ImageIcon className="h-3.5 w-3.5" />
-            <span>PNG, JPG up to 5MB</span>
+            <span>PNG, JPG up to 30MB</span>
           </div>
         </div>
       </div>

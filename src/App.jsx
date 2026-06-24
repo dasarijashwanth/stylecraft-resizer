@@ -318,9 +318,9 @@ export default function App() {
 
   // Handle source file upload
   const handleImageUpload = (uploadedFile) => {
-    if (uploadedFile.size > 5 * 1024 * 1024) {
+    if (uploadedFile.size > 30 * 1024 * 1024) {
       setToast({
-        message: 'Image file size must be less than 5 MB.',
+        message: 'Image file size must be less than 30 MB.',
         type: 'error',
       });
       return;

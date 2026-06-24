@@ -54,7 +54,12 @@ export const SIZES = [
   { id: 'stylecraft_webmobile_450x700', name: 'StyleCraft Web Mobile Portrait', width: 450, height: 700, category: 'StyleCraft', filename: 'StyleCraft-WebMobile-450X700' },
   { id: 'stylecraft_amazon_paid_300x600', name: 'StyleCraft Amazon Paid Skyscraper', width: 300, height: 600, category: 'StyleCraft', filename: 'StyleCraft-Amazon Paid-300X600' },
   { id: 'stylecraft_amazon_paid_300x250', name: 'StyleCraft Amazon Paid Ad Small', width: 300, height: 250, category: 'StyleCraft', filename: 'StyleCraft-Amazon Paid-300X250' },
-  { id: 'stylecraft_amazon_paid_160x600', name: 'StyleCraft Amazon Paid Skyscraper Slim', width: 160, height: 600, category: 'StyleCraft', filename: 'StyleCraft-Amazon Paid-160X600' }
+  { id: 'stylecraft_amazon_paid_160x600', name: 'StyleCraft Amazon Paid Skyscraper Slim', width: 160, height: 600, category: 'StyleCraft', filename: 'StyleCraft-Amazon Paid-160X600' },
+
+  // --- PDP CATEGORY ---
+  { id: 'pdp_2880x1600', name: 'PDP Ultra Wide', width: 2880, height: 1600, category: 'PDP', filename: 'PDP-2880X1600' },
+  { id: 'pdp_1500x2520', name: 'PDP Tall Portrait', width: 1500, height: 2520, category: 'PDP', filename: 'PDP-1500X2520' },
+  { id: 'pdp_750x1260', name: 'PDP Mobile Portrait', width: 750, height: 1260, category: 'PDP', filename: 'PDP-750X1260' }
 ];
 
-export const CATEGORIES = ['Gamma', 'StyleCraft'];
+export const CATEGORIES = ['Gamma', 'StyleCraft', 'PDP'];

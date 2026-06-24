@@ -836,6 +836,7 @@ export default function App() {
               setAiPrompt={setAiPrompt}
               onGenerateAiBackground={handleGenerateAiBackground}
               isGeneratingAiImage={isGeneratingAiImage}
+              documentMode={documentMode}
             />
 
             {/* Progress indicators */}

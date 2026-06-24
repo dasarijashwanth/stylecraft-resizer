@@ -31,6 +31,7 @@ export default function Controls({
   setAiPrompt,
   onGenerateAiBackground,
   isGeneratingAiImage = false,
+  documentMode = true,
 }) {
   return (
     <div className="w-full max-w-4xl mx-auto px-4 mb-8 transition-all duration-300">

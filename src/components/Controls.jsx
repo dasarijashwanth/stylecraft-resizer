@@ -25,16 +25,12 @@ export default function Controls({
   onSelectAll,
   onDeselectAll,
   onToggleCategory,
-  documentMode,
-  setDocumentMode,
-  ultraClarity,
-  setUltraClarity,
-  clarityEngine,
-  setClarityEngine,
   aiStyle = 'mirror',
   setAiStyle,
   aiPrompt = '',
   setAiPrompt,
+  onGenerateAiBackground,
+  isGeneratingAiImage = false,
 }) {
   return (
     <div className="w-full max-w-4xl mx-auto px-4 mb-8 transition-all duration-300">
@@ -67,7 +63,7 @@ export default function Controls({
               <span className="text-sm font-medium">Export Settings</span>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <div>
                 <label className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-1.5">
                   Format
@@ -77,146 +73,18 @@ export default function Controls({
                   onChange={(e) => setExportFormat(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-sm text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all cursor-pointer"
                 >
-                  {documentMode ? (
-                    <>
-                      <option value="image/png">PNG (Lossless Image)</option>
-                      <option value="application/msword">Word Document (.doc)</option>
-                    </>
-                  ) : (
-                    <>
-                      <option value="image/png">PNG (Lossless)</option>
-                      <option value="image/jpeg">JPEG</option>
-                      <option value="image/webp">WEBP</option>
-                      <option value="application/msword">Word Document (.doc)</option>
-                    </>
-                  )}
+                  <option value="image/png">PNG (Lossless)</option>
+                  <option value="image/jpeg">JPEG</option>
                 </select>
               </div>
-
-              <div>
-                <div className="flex justify-between items-center mb-1.5">
-                  <label className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block">
-                    Quality
-                  </label>
-                  <span className="text-xs font-bold text-indigo-650 dark:text-indigo-400">
-                    {documentMode || exportFormat === 'image/png' || exportFormat === 'application/msword' ? '100% (Lossless)' : `${Math.round(quality * 100)}%`}
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="0.1"
-                  max="1.0"
-                  step="0.05"
-                  value={documentMode || exportFormat === 'image/png' || exportFormat === 'application/msword' ? 1.0 : quality}
-                  disabled={documentMode || exportFormat === 'image/png' || exportFormat === 'application/msword'}
-                  onChange={(e) => setQuality(parseFloat(e.target.value))}
-                  className={`w-full h-2 bg-zinc-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-indigo-600 focus:outline-none ${
-                    documentMode || exportFormat === 'image/png' || exportFormat === 'application/msword' ? 'opacity-45 cursor-not-allowed' : ''
-                  }`}
-                />
-              </div>
             </div>
 
-            {/* Clarity Engine tabs selector */}
-            <div>
-              <div className="flex items-center gap-1.5 mb-1.5">
-                <Cpu className="h-3.5 w-3.5 text-zinc-450 dark:text-zinc-500" />
-                <label className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block">
-                  Clarity Resampling Engine
-                </label>
-              </div>
-              <div className="flex bg-zinc-50 dark:bg-zinc-950 p-1 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                <button
-                  type="button"
-                  onClick={() => setClarityEngine('hermite')}
-                  className={`flex-1 text-center py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                    clarityEngine === 'hermite'
-                      ? 'bg-white dark:bg-zinc-850 text-indigo-600 dark:text-indigo-400 shadow-sm border border-zinc-200/40 dark:border-zinc-750/30'
-                      : 'text-zinc-550 dark:text-zinc-450 hover:text-zinc-900 dark:hover:text-zinc-250'
-                  }`}
-                  title="Curve pixel interpolation. Keeps text & vector borders sharp on zoom."
-                >
-                  Ultra-Sharp
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setClarityEngine('bicubic')}
-                  className={`flex-1 text-center py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                    clarityEngine === 'bicubic'
-                      ? 'bg-white dark:bg-zinc-855 text-indigo-600 dark:text-indigo-400 shadow-sm border border-zinc-200/40 dark:border-zinc-750/30'
-                      : 'text-zinc-550 dark:text-zinc-450 hover:text-zinc-900 dark:hover:text-zinc-250'
-                  }`}
-                  title="Smooth photos interpolation."
-                >
-                  Bicubic
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setClarityEngine('pixelated')}
-                  className={`flex-1 text-center py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                    clarityEngine === 'pixelated'
-                      ? 'bg-white dark:bg-zinc-855 text-indigo-600 dark:text-indigo-400 shadow-sm border border-zinc-200/40 dark:border-zinc-750/30'
-                      : 'text-zinc-550 dark:text-zinc-450 hover:text-zinc-900 dark:hover:text-zinc-250'
-                  }`}
-                  title="No smoothing (Nearest neighbor). Keeps pixel-art and screenshots sharp."
-                >
-                  Pixelated
-                </button>
-              </div>
-            </div>
-
-            {/* Document Mode / Ultra Clarity toggles */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
-              <div 
-                onClick={() => setDocumentMode(!documentMode)}
-                className={`flex items-center justify-between gap-3 p-3 bg-zinc-50 dark:bg-zinc-950 rounded-2xl border transition-all cursor-pointer hover:border-zinc-300 dark:hover:border-zinc-800 ${
-                  documentMode 
-                    ? 'border-emerald-500/30 bg-emerald-50/20 dark:bg-emerald-950/5' 
-                    : 'border-zinc-200 dark:border-zinc-800'
-                }`}
-              >
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Document Mode</span>
-                  <span className="text-[9px] text-zinc-400 dark:text-zinc-500 leading-tight mt-0.5">Force raw file saving (100% Quality)</span>
-                </div>
-                <button
-                  type="button"
-                  className={`w-8.5 h-4.5 rounded-full p-0.5 transition-colors shrink-0 ${
-                    documentMode ? 'bg-emerald-500' : 'bg-zinc-200 dark:bg-zinc-800'
-                  }`}
-                >
-                  <div
-                    className={`w-3.5 h-3.5 rounded-full bg-white transition-transform ${
-                      documentMode ? 'translate-x-4' : 'translate-x-0'
-                    }`}
-                  />
-                </button>
-              </div>
-
-              <div 
-                onClick={() => setUltraClarity(!ultraClarity)}
-                className={`flex items-center justify-between gap-3 p-3 bg-zinc-50 dark:bg-zinc-950 rounded-2xl border transition-all cursor-pointer hover:border-zinc-300 dark:hover:border-zinc-800 ${
-                  ultraClarity 
-                    ? 'border-indigo-500/30 bg-indigo-50/20 dark:bg-indigo-950/5' 
-                    : 'border-zinc-200 dark:border-zinc-800'
-                }`}
-              >
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Subpixel Tuning</span>
-                  <span className="text-[9px] text-zinc-400 dark:text-zinc-500 leading-tight mt-0.5">Fine-tune subpixel anti-aliasing details</span>
-                </div>
-                <button
-                  type="button"
-                  className={`w-8.5 h-4.5 rounded-full p-0.5 transition-colors shrink-0 ${
-                    ultraClarity ? 'bg-indigo-600' : 'bg-zinc-200 dark:bg-zinc-800'
-                  }`}
-                >
-                  <div
-                    className={`w-3.5 h-3.5 rounded-full bg-white transition-transform ${
-                      ultraClarity ? 'translate-x-4' : 'translate-x-0'
-                    }`}
-                  />
-                </button>
+            {/* Clarity resampling engine info banner (since other resampling options are removed) */}
+            <div className="flex items-center gap-2.5 p-3.5 bg-indigo-50/10 dark:bg-indigo-950/10 border border-indigo-500/10 rounded-2xl mt-1">
+              <Cpu className="h-4.5 w-4.5 text-indigo-500 shrink-0" />
+              <div className="flex flex-col text-left">
+                <span className="text-xs font-bold text-zinc-750 dark:text-zinc-300">Ultra-Sharp Resampling Engine</span>
+                <span className="text-[10px] text-zinc-450 dark:text-zinc-500 leading-tight mt-0.5">High-fidelity Hermite curve resampling is active.</span>
               </div>
             </div>
 
@@ -351,13 +219,28 @@ export default function Controls({
                       <span className="text-[9px] text-zinc-500">Local Latent Synthesis active</span>
                     </div>
 
-                    <input
-                      type="text"
-                      value={aiPrompt}
-                      onChange={(e) => setAiPrompt(e.target.value)}
-                      placeholder="e.g. vintage film grain, high luxury ambient gold glow..."
-                      className="w-full px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-zinc-200 placeholder-zinc-550 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 mb-2 transition-all"
-                    />
+                    <div className="flex gap-2 mb-2">
+                      <input
+                        type="text"
+                        value={aiPrompt}
+                        onChange={(e) => setAiPrompt(e.target.value)}
+                        placeholder="e.g. vintage film grain, high luxury ambient gold glow..."
+                        className="flex-1 px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-zinc-250 placeholder-zinc-550 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 transition-all"
+                      />
+                      <button
+                        type="button"
+                        onClick={onGenerateAiBackground}
+                        disabled={isGeneratingAiImage || !aiPrompt.trim()}
+                        className="px-4 py-1.5 bg-indigo-650 hover:bg-indigo-600 disabled:bg-zinc-800 disabled:text-zinc-500 text-white font-bold text-xs rounded-xl cursor-pointer transition-all flex items-center gap-1.5 shrink-0"
+                      >
+                        {isGeneratingAiImage ? (
+                          <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <Cpu className="w-3.5 h-3.5" />
+                        )}
+                        <span>{isGeneratingAiImage ? 'Generating...' : 'Generate'}</span>
+                      </button>
+                    </div>
 
                     {/* Quick Tags presets */}
                     <div className="flex flex-wrap gap-1.5">

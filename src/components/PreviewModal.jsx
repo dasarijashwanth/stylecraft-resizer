@@ -39,6 +39,7 @@ export default function PreviewModal({
   onClose,
   onSaveToDrive,
   isSavingToDrive = false,
+  aiGeneratedImageElement = null,
 }) {
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -69,7 +70,8 @@ export default function PreviewModal({
           ultraClarity, 
           clarityEngine,
           aiStyle,
-          aiPrompt
+          aiPrompt,
+          aiGeneratedImageElement
         );
         if (canvas && active) {
           const blob = await canvasToBlob(canvas, 'image/png'); // Display as PNG on screen
@@ -155,7 +157,7 @@ export default function PreviewModal({
     const outputName = size.filename || `${baseName}_${size.width}x${size.height}`;
 
     try {
-      const canvas = resizeImage(imageElement, size.width, size.height, bgType, bgColor, ultraClarity, clarityEngine, aiStyle, aiPrompt);
+      const canvas = resizeImage(imageElement, size.width, size.height, bgType, bgColor, ultraClarity, clarityEngine, aiStyle, aiPrompt, aiGeneratedImageElement);
       if (!canvas) throw new Error('Canvas render failed');
 
       if (activeFormat === 'application/msword') {

@@ -64,9 +64,13 @@ export default function App() {
   const [quality, setQuality] = useState(0.95);
   
   // Clarity and Document mode additions
-  const [documentMode, setDocumentMode] = useState(false); // Default to false so image output is standard
-  const [ultraClarity, setUltraClarity] = useState(true); // Default to true to force high-quality bicubic smoothing
+  const [documentMode, setDocumentMode] = useState(true); // Default to true (always active under the hood)
+  const [ultraClarity, setUltraClarity] = useState(true); // Default to true
   const [clarityEngine, setClarityEngine] = useState('hermite'); // Default to Hermite resampling filter for sharpness
+
+  // AI Generated Backdrop Image states
+  const [aiGeneratedImageElement, setAiGeneratedImageElement] = useState(null);
+  const [isGeneratingAiImage, setIsGeneratingAiImage] = useState(false);
   
   // Interactive full resolution preview modal state
   const [previewSizeItem, setPreviewSizeItem] = useState(null);
@@ -256,7 +260,7 @@ export default function App() {
       const activeFormat = exportFormat;
       const activeQuality = documentMode ? 1.0 : quality;
 
-      const canvas = resizeImage(imageElement, size.width, size.height, bgType, bgColor, ultraClarity, clarityEngine, aiStyle, aiPrompt);
+      const canvas = resizeImage(imageElement, size.width, size.height, bgType, bgColor, ultraClarity, clarityEngine, aiStyle, aiPrompt, aiGeneratedImageElement);
       if (!canvas) throw new Error('Canvas render failed');
 
       const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || 'image';
@@ -314,6 +318,17 @@ export default function App() {
 
   // Handle source file upload
   const handleImageUpload = (uploadedFile) => {
+    if (uploadedFile.size > 5 * 1024 * 1024) {
+      setToast({
+        message: 'Image file size must be less than 5 MB.',
+        type: 'error',
+      });
+      return;
+    }
+
+    // Clear previous AI backdrop on new file upload
+    setAiGeneratedImageElement(null);
+
     if (imageSrc) {
       URL.revokeObjectURL(imageSrc);
     }
@@ -330,6 +345,36 @@ export default function App() {
     img.src = src;
   };
 
+  const handleGenerateAiBackground = async () => {
+    if (!aiPrompt.trim()) return;
+    setIsGeneratingAiImage(true);
+    setStatusMessage('Generating AI Smart Extend backdrop...');
+    try {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      const seed = Math.floor(Math.random() * 100000);
+      img.src = `https://image.pollinations.ai/p/${encodeURIComponent(aiPrompt)}?width=1000&height=1000&seed=${seed}&nologo=true`;
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = () => reject(new Error('Failed to load AI generated image'));
+      });
+      setAiGeneratedImageElement(img);
+      setToast({
+        message: 'AI Smart Extend background generated!',
+        type: 'success',
+      });
+    } catch (err) {
+      console.error("AI image generation failed:", err);
+      setToast({
+        message: 'AI generation failed. Using high-fidelity procedural fallback.',
+        type: 'error',
+      });
+    } finally {
+      setIsGeneratingAiImage(false);
+      setStatusMessage('');
+    }
+  };
+
   // Reset application to upload state
   const handleReset = () => {
     if (imageSrc) {
@@ -342,6 +387,7 @@ export default function App() {
     setPreviews({});
     setEstimatedSizes({});
     setSelectedSizes(new Set(activeSizesList.map((s) => s.id)));
+    setAiGeneratedImageElement(null);
   };
 
   // 1. Scheduler: Generate Previews in background chunk by chunk to avoid UI stuttering
@@ -376,7 +422,8 @@ export default function App() {
           ultraClarity,
           clarityEngine, // Pass active clarityEngine
           aiStyle,
-          aiPrompt
+          aiPrompt,
+          aiGeneratedImageElement
         );
 
         if (canvas) {
@@ -402,7 +449,7 @@ export default function App() {
     return () => {
       isCancelled = true;
     };
-  }, [imageElement, bgType, bgColor, ultraClarity, clarityEngine, activeSizesList, aiStyle, aiPrompt]);
+  }, [imageElement, bgType, bgColor, ultraClarity, clarityEngine, activeSizesList, aiStyle, aiPrompt, aiGeneratedImageElement]);
 
   // 2. Scheduler: Re-estimate file sizes instantly when quality/format/documentMode adjustments occur
   useEffect(() => {
@@ -552,7 +599,7 @@ export default function App() {
       const activeFormat = exportFormat;
       const activeQuality = documentMode ? 1.0 : quality;
 
-      const canvas = resizeImage(imageElement, size.width, size.height, bgType, bgColor, ultraClarity, clarityEngine, aiStyle, aiPrompt);
+      const canvas = resizeImage(imageElement, size.width, size.height, bgType, bgColor, ultraClarity, clarityEngine, aiStyle, aiPrompt, aiGeneratedImageElement);
       if (!canvas) throw new Error('Canvas render failed');
 
       const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || 'image';
@@ -622,7 +669,7 @@ export default function App() {
         setStatusMessage(`Processing: ${size.name} (${size.width} × ${size.height} px)`);
         
         // Render high-res canvas
-        const canvas = resizeImage(imageElement, size.width, size.height, bgType, bgColor, ultraClarity, clarityEngine, aiStyle, aiPrompt);
+        const canvas = resizeImage(imageElement, size.width, size.height, bgType, bgColor, ultraClarity, clarityEngine, aiStyle, aiPrompt, aiGeneratedImageElement);
         const outputName = size.filename || `${size.id}_${size.width}x${size.height}`;
         if (canvas) {
           if (activeFormat === 'application/msword') {
@@ -682,7 +729,7 @@ export default function App() {
         const size = selectedList[i];
         setStatusMessage(`Syncing: ${size.name} to Drive folder "${folderName}"...`);
         
-        const canvas = resizeImage(imageElement, size.width, size.height, bgType, bgColor, ultraClarity, clarityEngine, aiStyle, aiPrompt);
+        const canvas = resizeImage(imageElement, size.width, size.height, bgType, bgColor, ultraClarity, clarityEngine, aiStyle, aiPrompt, aiGeneratedImageElement);
         if (canvas) {
           const activeFormat = exportFormat;
           const activeQuality = documentMode ? 1.0 : quality;
@@ -783,16 +830,12 @@ export default function App() {
               onSelectAll={handleSelectAll}
               onDeselectAll={handleDeselectAll}
               onToggleCategory={handleToggleCategory}
-              documentMode={documentMode}
-              setDocumentMode={setDocumentMode}
-              ultraClarity={ultraClarity}
-              setUltraClarity={setUltraClarity}
-              clarityEngine={clarityEngine}
-              setClarityEngine={setClarityEngine}
               aiStyle={aiStyle}
               setAiStyle={setAiStyle}
               aiPrompt={aiPrompt}
               setAiPrompt={setAiPrompt}
+              onGenerateAiBackground={handleGenerateAiBackground}
+              isGeneratingAiImage={isGeneratingAiImage}
             />
 
             {/* Progress indicators */}
@@ -876,6 +919,7 @@ export default function App() {
           clarityEngine={clarityEngine}
           aiStyle={aiStyle}
           aiPrompt={aiPrompt}
+          aiGeneratedImageElement={aiGeneratedImageElement}
           onClose={() => setPreviewSizeItem(null)}
           onSaveToDrive={handleSaveToDriveSingle}
           isSavingToDrive={savingToDriveIds.has(previewSizeItem.id)}

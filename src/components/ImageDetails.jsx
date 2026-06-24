@@ -60,6 +60,12 @@ export default function ImageDetails({ file, dimensions, imageSrc, onReset }) {
               </div>
             </div>
           </div>
+          {dimensions && (dimensions.width < 3000 || dimensions.height < 3000) && (
+            <div className="mt-4 p-3.5 bg-red-500/10 border border-red-500/30 text-red-500 rounded-2xl text-xs font-semibold flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+              <span>Note: Image dimensions are less than 3000×3000 px. Upload high-res images for best results.</span>
+            </div>
+          )}
         </div>
 
       </div>

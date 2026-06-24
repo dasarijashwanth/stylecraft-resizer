@@ -140,7 +140,7 @@ export function extractDominantColors(imageElement, maxColors = 4) {
 /**
  * Shared logic to draw canvas backgrounds including standard blurs and generative AI styles.
  */
-function drawBackground(ctx, canvas, imageElement, width, height, bgType, bgColor, aiStyle = 'mirror', aiPrompt = '') {
+function drawBackground(ctx, canvas, imageElement, width, height, bgType, bgColor, aiStyle = 'mirror', aiPrompt = '', aiGeneratedImageElement = null) {
   const wOrig = imageElement.naturalWidth || imageElement.width;
   const hOrig = imageElement.naturalHeight || imageElement.height;
   const arOrig = wOrig / hOrig;
@@ -167,7 +167,25 @@ function drawBackground(ctx, canvas, imageElement, width, height, bgType, bgColo
     ctx.drawImage(imageElement, xCover, yCover, wCover, hCover);
     ctx.restore();
   } else if (bgType === 'ai') {
-    const style = (aiStyle || 'mirror').toLowerCase();
+    if (aiGeneratedImageElement) {
+      ctx.save();
+      const wAI = aiGeneratedImageElement.naturalWidth || aiGeneratedImageElement.width || 800;
+      const hAI = aiGeneratedImageElement.naturalHeight || aiGeneratedImageElement.height || 800;
+      const arAI = wAI / hAI;
+      let coverScale;
+      if (arAI > arTarget) {
+        coverScale = height / hAI;
+      } else {
+        coverScale = width / wAI;
+      }
+      const wCover = wAI * coverScale;
+      const hCover = hAI * coverScale;
+      const xCover = (width - wCover) / 2;
+      const yCover = (height - hCover) / 2;
+      ctx.drawImage(aiGeneratedImageElement, xCover, yCover, wCover, hCover);
+      ctx.restore();
+    } else {
+      const style = (aiStyle || 'mirror').toLowerCase();
     
     if (style === 'mirror') {
       let coverScale;
@@ -323,6 +341,7 @@ function drawBackground(ctx, canvas, imageElement, width, height, bgType, bgColo
     ctx.globalCompositeOperation = 'overlay';
     ctx.fillRect(0, 0, width, height);
     ctx.restore();
+    }
   } else {
     ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, width, height);
@@ -343,7 +362,8 @@ export function resizeImage(
   ultraClarity = true,
   clarityEngine = 'hermite', // 'bicubic' | 'hermite' | 'pixelated'
   aiStyle = 'mirror',
-  aiPrompt = ''
+  aiPrompt = '',
+  aiGeneratedImageElement = null
 ) {
   const canvas = document.createElement('canvas');
   canvas.width = targetWidth;
@@ -366,7 +386,7 @@ export function resizeImage(
   const arTarget = targetWidth / targetHeight;
 
   // 1. Draw Background
-  drawBackground(ctx, canvas, imageElement, targetWidth, targetHeight, bgType, bgColor, aiStyle, aiPrompt);
+  drawBackground(ctx, canvas, imageElement, targetWidth, targetHeight, bgType, bgColor, aiStyle, aiPrompt, aiGeneratedImageElement);
 
   // 2. Draw Centered Contain Image
   let fitScale;
@@ -404,7 +424,8 @@ export function resizeImagePreview(
   ultraClarity = true,
   clarityEngine = 'hermite',
   aiStyle = 'mirror',
-  aiPrompt = ''
+  aiPrompt = '',
+  aiGeneratedImageElement = null
 ) {
   let previewScale = 1;
   if (targetWidth > maxPreviewSize || targetHeight > maxPreviewSize) {
@@ -438,7 +459,7 @@ export function resizeImagePreview(
   const arTarget = targetWidth / targetHeight;
 
   // 1. Draw Background
-  drawBackground(ctx, canvas, imageElement, pWidth, pHeight, bgType, bgColor, aiStyle, aiPrompt);
+  drawBackground(ctx, canvas, imageElement, pWidth, pHeight, bgType, bgColor, aiStyle, aiPrompt, aiGeneratedImageElement);
 
   // 2. Draw Centered Contain Image
   let fitScale;

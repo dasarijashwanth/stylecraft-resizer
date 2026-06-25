@@ -69,6 +69,8 @@ export default function App() {
   const [documentMode, setDocumentMode] = useState(true); // Default to true (always active under the hood)
   const [ultraClarity, setUltraClarity] = useState(true); // Default to true
   const [clarityEngine, setClarityEngine] = useState('hermite'); // Default to Hermite resampling filter for sharpness
+  const [sizingMode, setSizingMode] = useState('fit'); // Default sizing mode
+
 
   // AI Generated Backdrop Image states
   const [aiGeneratedImageElement, setAiGeneratedImageElement] = useState(null);
@@ -263,7 +265,7 @@ export default function App() {
       const activeFormat = exportFormat;
       const activeQuality = documentMode ? 1.0 : quality;
 
-      const canvas = resizeImage(imageElement, size.width, size.height, bgType, bgColor, ultraClarity, clarityEngine, aiStyle, aiPrompt, aiGeneratedImageElement);
+      const canvas = resizeImage(imageElement, size.width, size.height, bgType, bgColor, ultraClarity, clarityEngine, aiStyle, aiPrompt, aiGeneratedImageElement, sizingMode);
       if (!canvas) throw new Error('Canvas render failed');
 
       const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || 'image';
@@ -363,13 +365,30 @@ export default function App() {
     }
     setLastAiGenTime(now);
 
+    let finalPrompt = cleanPrompt;
+    if (sizingMode === 'background_stretch') {
+      let targetDimensionsText = '1000x1000';
+      const selectedList = activeSizesList.filter((s) => selectedSizes.has(s.id));
+      if (selectedList.length > 0) {
+        targetDimensionsText = `${selectedList[0].width}x${selectedList[0].height}`;
+      }
+      finalPrompt += `, extend background to fill ${targetDimensionsText} frame, keep subject centered, seamlessly expand surroundings`;
+    } else if (sizingMode === 'enlarge_to_frame') {
+      let targetDimensionsText = '1000x1000';
+      const selectedList = activeSizesList.filter((s) => selectedSizes.has(s.id));
+      if (selectedList.length > 0) {
+        targetDimensionsText = `${selectedList[0].width}x${selectedList[0].height}`;
+      }
+      finalPrompt += `, scale up and enlarge main subject to fill entire ${targetDimensionsText} frame, expand background to match`;
+    }
+
     setIsGeneratingAiImage(true);
     setStatusMessage('Generating AI Smart Extend backdrop...');
     try {
       const img = new Image();
       img.crossOrigin = 'anonymous';
       const seed = Math.floor(Math.random() * 100000);
-      img.src = `https://image.pollinations.ai/p/${encodeURIComponent(cleanPrompt)}?width=1000&height=1000&seed=${seed}&nologo=true`;
+      img.src = `https://image.pollinations.ai/p/${encodeURIComponent(finalPrompt)}?width=1000&height=1000&seed=${seed}&nologo=true`;
       await new Promise((resolve, reject) => {
         img.onload = resolve;
         img.onerror = () => reject(new Error('Failed to load AI generated image'));
@@ -439,7 +458,8 @@ export default function App() {
           clarityEngine, // Pass active clarityEngine
           aiStyle,
           aiPrompt,
-          aiGeneratedImageElement
+          aiGeneratedImageElement,
+          sizingMode
         );
 
         if (canvas) {
@@ -465,7 +485,7 @@ export default function App() {
     return () => {
       isCancelled = true;
     };
-  }, [imageElement, bgType, bgColor, ultraClarity, clarityEngine, activeSizesList, aiStyle, aiPrompt, aiGeneratedImageElement]);
+  }, [imageElement, bgType, bgColor, ultraClarity, clarityEngine, activeSizesList, aiStyle, aiPrompt, aiGeneratedImageElement, sizingMode]);
 
   // 2. Scheduler: Re-estimate file sizes instantly when quality/format/documentMode adjustments occur
   useEffect(() => {
@@ -615,7 +635,7 @@ export default function App() {
       const activeFormat = exportFormat;
       const activeQuality = documentMode ? 1.0 : quality;
 
-      const canvas = resizeImage(imageElement, size.width, size.height, bgType, bgColor, ultraClarity, clarityEngine, aiStyle, aiPrompt, aiGeneratedImageElement);
+      const canvas = resizeImage(imageElement, size.width, size.height, bgType, bgColor, ultraClarity, clarityEngine, aiStyle, aiPrompt, aiGeneratedImageElement, sizingMode);
       if (!canvas) throw new Error('Canvas render failed');
 
       const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || 'image';
@@ -685,7 +705,7 @@ export default function App() {
         setStatusMessage(`Processing: ${size.name} (${size.width} × ${size.height} px)`);
         
         // Render high-res canvas
-        const canvas = resizeImage(imageElement, size.width, size.height, bgType, bgColor, ultraClarity, clarityEngine, aiStyle, aiPrompt, aiGeneratedImageElement);
+        const canvas = resizeImage(imageElement, size.width, size.height, bgType, bgColor, ultraClarity, clarityEngine, aiStyle, aiPrompt, aiGeneratedImageElement, sizingMode);
         const outputName = size.filename || `${size.id}_${size.width}x${size.height}`;
         if (canvas) {
           if (activeFormat === 'application/msword') {
@@ -745,7 +765,7 @@ export default function App() {
         const size = selectedList[i];
         setStatusMessage(`Syncing: ${size.name} to Drive folder "${folderName}"...`);
         
-        const canvas = resizeImage(imageElement, size.width, size.height, bgType, bgColor, ultraClarity, clarityEngine, aiStyle, aiPrompt, aiGeneratedImageElement);
+        const canvas = resizeImage(imageElement, size.width, size.height, bgType, bgColor, ultraClarity, clarityEngine, aiStyle, aiPrompt, aiGeneratedImageElement, sizingMode);
         if (canvas) {
           const activeFormat = exportFormat;
           const activeQuality = documentMode ? 1.0 : quality;
@@ -876,6 +896,8 @@ export default function App() {
               onGenerateAiBackground={handleGenerateAiBackground}
               isGeneratingAiImage={isGeneratingAiImage}
               documentMode={documentMode}
+              sizingMode={sizingMode}
+              setSizingMode={setSizingMode}
             />
 
             {/* Progress indicators */}
@@ -940,6 +962,7 @@ export default function App() {
               savingToDriveIds={savingToDriveIds}
               isGenerating={isProcessing}
               ultraClarity={ultraClarity}
+              sizingMode={sizingMode}
             />
           </div>
         )}
@@ -963,6 +986,7 @@ export default function App() {
           onClose={() => setPreviewSizeItem(null)}
           onSaveToDrive={handleSaveToDriveSingle}
           isSavingToDrive={savingToDriveIds.has(previewSizeItem.id)}
+          sizingMode={sizingMode}
         />
       )}
 

@@ -14,6 +14,7 @@ export default function SizeGrid({
   savingToDriveIds = new Set(),
   isGenerating,
   ultraClarity,
+  sizingMode = 'fit',
 }) {
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 flex flex-col gap-10">
@@ -51,6 +52,7 @@ export default function SizeGrid({
                     isSavingToDrive={savingToDriveIds.has(size.id)}
                     isGenerating={isGenerating}
                     ultraClarity={ultraClarity}
+                    sizingMode={sizingMode}
                   />
                 );
               })}

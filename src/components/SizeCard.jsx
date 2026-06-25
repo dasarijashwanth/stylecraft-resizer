@@ -14,7 +14,24 @@ export default function SizeCard({
   isSavingToDrive = false,
   isGenerating,
   ultraClarity = true,
+  sizingMode = 'fit',
 }) {
+  const getObjectFitStyle = () => {
+    switch (sizingMode) {
+      case 'fit':
+        return 'contain';
+      case 'fill':
+        return 'cover';
+      case 'stretch':
+        return 'fill';
+      case 'background_stretch':
+      case 'enlarge_to_frame':
+        return 'cover';
+      default:
+        return 'contain';
+    }
+  };
+
   return (
     <div
       onClick={onToggleSelect}
@@ -36,13 +53,27 @@ export default function SizeCard({
       </div>
 
       {/* Image Preview Container */}
-      <div className="relative aspect-square w-full rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-850 overflow-hidden flex items-center justify-center shrink-0 mb-4 group-hover:scale-[1.01] transition-transform duration-300">
+      <div className="relative aspect-square w-full rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-850 overflow-hidden flex items-center justify-center shrink-0 mb-4 group-hover:scale-[1.01] transition-transform duration-300 p-2">
         {previewSrc ? (
-          <>
+          <div 
+            style={{ 
+              width: `${size.width}px`, 
+              height: `${size.height}px`,
+              maxWidth: '100%',
+              maxHeight: '100%',
+              aspectRatio: `${size.width} / ${size.height}`
+            }}
+            className="relative overflow-hidden flex items-center justify-center rounded-lg"
+          >
             <img
               src={previewSrc}
               alt={size.name}
-              className="max-w-full max-h-full object-contain p-3 transition-opacity duration-300"
+              style={{
+                objectFit: getObjectFitStyle(),
+                width: '100%',
+                height: '100%'
+              }}
+              className="transition-opacity duration-300"
               loading="lazy"
             />
             {/* Hover preview zoom banner */}
@@ -58,7 +89,7 @@ export default function SizeCard({
               </div>
               <span className="text-[10px] font-bold tracking-wider uppercase">Preview Detail</span>
             </div>
-          </>
+          </div>
         ) : (
           /* Loading Skeleton */
           <div className="absolute inset-0 flex items-center justify-center">

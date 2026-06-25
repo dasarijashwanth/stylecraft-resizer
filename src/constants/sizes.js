@@ -1,32 +1,4 @@
 export const SIZES = [
-  // --- GAMMA CATEGORY ---
-  { id: 'gamma_amazon_3000x1500', name: 'Gamma Amazon Banner', width: 3000, height: 1500, category: 'Gamma', filename: 'Gamma-Amazon-3000X1500' },
-  { id: 'gamma_web_3000x469', name: 'Gamma Web Large Banner', width: 3000, height: 469, category: 'Gamma', filename: 'Gamma-Web-3000X469-1' },
-  { id: 'gamma_amazon_paid_2560x2560', name: 'Gamma Amazon Paid Square', width: 2560, height: 2560, category: 'Gamma', filename: 'Gamma-Amazon Paid-2560X2560' },
-  { id: 'gamma_2000x2000', name: 'Gamma 2000 Square', width: 2000, height: 2000, category: 'Gamma', filename: 'Gamma-2000X2000' },
-  { id: 'gamma_amazon_paid_1940x500', name: 'Gamma Amazon Paid Banner', width: 1940, height: 500, category: 'Gamma', filename: 'Gamma-Amazon Paid-1940X500' },
-  { id: 'gamma_web_1920x825', name: 'Gamma Web Header', width: 1920, height: 825, category: 'Gamma', filename: 'Gamma-Web-1920X825' },
-  { id: 'gamma_category_top_1900x297', name: 'Gamma Category Top Banner', width: 1900, height: 297, category: 'Gamma', filename: 'Gamma-Category-Top-Banner-1900X297' },
-  { id: 'gamma_amazon_1500x300', name: 'Gamma Amazon Small Banner', width: 1500, height: 300, category: 'Gamma', filename: 'Gamma-Amazon-1500X300' },
-  { id: 'gamma_walmart_1494x894', name: 'Gamma Walmart Listing', width: 1494, height: 894, category: 'Gamma', filename: 'Gamma-Walmart-1494X894' },
-  { id: 'gamma_lamark_1200x1200', name: 'Gamma Lamark Square', width: 1200, height: 1200, category: 'Gamma', filename: 'Gamma-Lamark-1200X1200' },
-  { id: 'gamma_lamark_1200x628', name: 'Gamma Lamark Banner', width: 1200, height: 628, category: 'Gamma', filename: 'Gamma-Lamark-1200X628' },
-  { id: 'gamma_social_1080x1920', name: 'Gamma Social Portrait', width: 1080, height: 1920, category: 'Gamma', filename: 'Gamma-SocialMedia-1080X1920' },
-  { id: 'gamma_social_1080x1440', name: 'Gamma Social Post', width: 1080, height: 1440, category: 'Gamma', filename: 'Gamma-SocialMedia-1080X1440' },
-  { id: 'gamma_1000x1000', name: 'Gamma 1000 Square', width: 1000, height: 1000, category: 'Gamma', filename: 'Gamma-1000X1000' },
-  { id: 'gamma_category_top_1000x270', name: 'Gamma Category Banner Small', width: 1000, height: 270, category: 'Gamma', filename: 'Gamma-Category-Top-Banner-1000X270' },
-  { id: 'gamma_amazon_paid_970x250', name: 'Gamma Amazon Paid Billboard', width: 970, height: 250, category: 'Gamma', filename: 'Gamma-Amazon Paid-970X250' },
-  { id: 'gamma_amazon_paid_828x250', name: 'Gamma Amazon Paid Header', width: 828, height: 250, category: 'Gamma', filename: 'Gamma-Amazon Paid-828X250' },
-  { id: 'gamma_email_800x1200', name: 'Gamma Email Template', width: 800, height: 1200, category: 'Gamma', filename: 'Gamma-Email-800X1200' },
-  { id: 'gamma_amazon_paid_728x90', name: 'Gamma Amazon Paid Leaderboard', width: 728, height: 90, category: 'Gamma', filename: 'Gamma-Amazon Paid-728X90' },
-  { id: 'gamma_amazon_paid_640x100', name: 'Gamma Amazon Paid Banner Wide', width: 640, height: 100, category: 'Gamma', filename: 'Gamma-Amazon Paid-640X100' },
-  { id: 'gamma_amazon_paid_600x500', name: 'Gamma Amazon Paid Ad Large', width: 600, height: 500, category: 'Gamma', filename: 'Gamma-Amazon Paid-600X500' },
-  { id: 'gamma_amazon_paid_600x315', name: 'Gamma Amazon Paid Ad Rect', width: 600, height: 315, category: 'Gamma', filename: 'Gamma-Amazon Paid-600X315' },
-  { id: 'gamma_webmobile_450x700', name: 'Gamma Web Mobile Portrait', width: 450, height: 700, category: 'Gamma', filename: 'Gamma-WebMobile-450X700' },
-  { id: 'gamma_amazon_paid_300x600', name: 'Gamma Amazon Paid Skyscraper', width: 300, height: 600, category: 'Gamma', filename: 'Gamma-Amazon Paid-300X600' },
-  { id: 'gamma_amazon_paid_300x250', name: 'Gamma Amazon Paid Ad Small', width: 300, height: 250, category: 'Gamma', filename: 'Gamma-Amazon Paid-300X250' },
-  { id: 'gamma_amazon_paid_160x600', name: 'Gamma Amazon Paid Skyscraper Slim', width: 160, height: 600, category: 'Gamma', filename: 'Gamma-Amazon Paid-160X600' },
-
   // --- STYLECRAFT CATEGORY ---
   { id: 'stylecraft_amazon_3000x1500', name: 'StyleCraft Amazon Banner', width: 3000, height: 1500, category: 'StyleCraft', filename: 'StyleCraft-Amazon-3000X1500' },
   { id: 'stylecraft_web_3000x469', name: 'StyleCraft Web Large Banner', width: 3000, height: 469, category: 'StyleCraft', filename: 'StyleCraft-Web-3000X469' },
@@ -62,4 +34,4 @@ export const SIZES = [
   { id: 'pdp_750x1260', name: 'PDP Mobile Portrait', width: 750, height: 1260, category: 'PDP', filename: 'PDP-750X1260' }
 ];
 
-export const CATEGORIES = ['Gamma', 'StyleCraft', 'PDP'];
+export const CATEGORIES = ['StyleCraft', 'PDP'];

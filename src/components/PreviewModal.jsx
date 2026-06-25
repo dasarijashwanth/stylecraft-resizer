@@ -40,6 +40,7 @@ export default function PreviewModal({
   onSaveToDrive,
   isSavingToDrive = false,
   aiGeneratedImageElement = null,
+  sizingMode = 'fit',
 }) {
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -71,7 +72,8 @@ export default function PreviewModal({
           clarityEngine,
           aiStyle,
           aiPrompt,
-          aiGeneratedImageElement
+          aiGeneratedImageElement,
+          sizingMode
         );
         if (canvas && active) {
           const blob = await canvasToBlob(canvas, 'image/png'); // Display as PNG on screen
@@ -92,7 +94,7 @@ export default function PreviewModal({
         URL.revokeObjectURL(previewUrl);
       }
     };
-  }, [size, imageElement, bgType, bgColor, ultraClarity, clarityEngine, aiStyle, aiPrompt]);
+  }, [size, imageElement, bgType, bgColor, ultraClarity, clarityEngine, aiStyle, aiPrompt, aiGeneratedImageElement, sizingMode]);
 
   // Handle Zoom In / Zoom Out
   const handleZoom = (type) => {
@@ -157,7 +159,7 @@ export default function PreviewModal({
     const outputName = size.filename || `${baseName}_${size.width}x${size.height}`;
 
     try {
-      const canvas = resizeImage(imageElement, size.width, size.height, bgType, bgColor, ultraClarity, clarityEngine, aiStyle, aiPrompt, aiGeneratedImageElement);
+      const canvas = resizeImage(imageElement, size.width, size.height, bgType, bgColor, ultraClarity, clarityEngine, aiStyle, aiPrompt, aiGeneratedImageElement, sizingMode);
       if (!canvas) throw new Error('Canvas render failed');
 
       if (activeFormat === 'application/msword') {
@@ -231,16 +233,32 @@ export default function PreviewModal({
               style={{
                 transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
                 transition: isDragging ? 'none' : 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                width: `${size.width}px`,
+                height: `${size.height}px`,
+                maxWidth: '85%',
+                maxHeight: '85%',
+                aspectRatio: `${size.width} / ${size.height}`
               }}
-              className="max-w-[85%] max-h-[85%] flex items-center justify-center select-none"
+              className="relative overflow-hidden flex items-center justify-center select-none rounded-2xl shadow-2xl border border-black/10 dark:border-white/10 bg-zinc-50 dark:bg-zinc-900"
             >
               <img
                 ref={imageRef}
                 src={previewUrl}
                 alt={size.name}
                 draggable={false}
-                style={{ imageRendering: renderingStyle }}
-                className="max-w-full max-h-full object-contain shadow-lg border border-black/10 dark:border-white/10"
+                style={{ 
+                  imageRendering: renderingStyle,
+                  objectFit: 
+                    sizingMode === 'fit' ? 'contain' : 
+                    sizingMode === 'fill' ? 'cover' : 
+                    sizingMode === 'stretch' ? 'fill' : 
+                    sizingMode === 'background_stretch' ? 'cover' :
+                    sizingMode === 'enlarge_to_frame' ? 'cover' :
+                    'contain',
+                  width: '100%',
+                  height: '100%'
+                }}
+                className="transition-opacity duration-300"
               />
             </div>
           )}

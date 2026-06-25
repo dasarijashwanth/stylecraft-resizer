@@ -363,7 +363,8 @@ export function resizeImage(
   clarityEngine = 'hermite', // 'bicubic' | 'hermite' | 'pixelated'
   aiStyle = 'mirror',
   aiPrompt = '',
-  aiGeneratedImageElement = null
+  aiGeneratedImageElement = null,
+  sizingMode = 'fit'
 ) {
   const canvas = document.createElement('canvas');
   canvas.width = targetWidth;
@@ -388,24 +389,62 @@ export function resizeImage(
   // 1. Draw Background
   drawBackground(ctx, canvas, imageElement, targetWidth, targetHeight, bgType, bgColor, aiStyle, aiPrompt, aiGeneratedImageElement);
 
-  // 2. Draw Centered Contain Image
-  let fitScale;
-  if (arOrig > arTarget) {
-    fitScale = targetWidth / wOrig;
+  // 2. Draw Image based on Sizing Mode
+  let drawW, drawH, drawX, drawY;
+
+  if (sizingMode === 'fill' || sizingMode === 'enlarge_to_frame') {
+    let scale;
+    if (arOrig > arTarget) {
+      scale = targetHeight / hOrig;
+    } else {
+      scale = targetWidth / wOrig;
+    }
+    drawW = Math.round(wOrig * scale);
+    drawH = Math.round(hOrig * scale);
+    drawX = Math.round((targetWidth - drawW) / 2);
+    drawY = Math.round((targetHeight - drawH) / 2);
+  } else if (sizingMode === 'stretch') {
+    drawW = targetWidth;
+    drawH = targetHeight;
+    drawX = 0;
+    drawY = 0;
+  } else if (sizingMode === 'background_stretch') {
+    if (wOrig <= targetWidth && hOrig <= targetHeight) {
+      drawW = wOrig;
+      drawH = hOrig;
+      drawX = Math.round((targetWidth - wOrig) / 2);
+      drawY = Math.round((targetHeight - hOrig) / 2);
+    } else {
+      let scale;
+      if (arOrig > arTarget) {
+        scale = targetWidth / wOrig;
+      } else {
+        scale = targetHeight / hOrig;
+      }
+      drawW = Math.round(wOrig * scale);
+      drawH = Math.round(hOrig * scale);
+      drawX = Math.round((targetWidth - drawW) / 2);
+      drawY = Math.round((targetHeight - drawH) / 2);
+    }
   } else {
-    fitScale = targetHeight / hOrig;
+    let scale;
+    if (arOrig > arTarget) {
+      scale = targetWidth / wOrig;
+    } else {
+      scale = targetHeight / hOrig;
+    }
+    drawW = Math.round(wOrig * scale);
+    drawH = Math.round(hOrig * scale);
+    drawX = Math.round((targetWidth - drawW) / 2);
+    drawY = Math.round((targetHeight - drawH) / 2);
   }
-  const wFit = Math.round(wOrig * fitScale);
-  const hFit = Math.round(hOrig * fitScale);
-  const xFit = Math.round((targetWidth - wFit) / 2);
-  const yFit = Math.round((targetHeight - hFit) / 2);
 
   if (clarityEngine === 'hermite') {
     const srcCanvas = imageToCanvas(imageElement);
-    const resampledCanvas = resampleHermite(srcCanvas, wFit, hFit);
-    ctx.drawImage(resampledCanvas, xFit, yFit, wFit, hFit);
+    const resampledCanvas = resampleHermite(srcCanvas, drawW, drawH);
+    ctx.drawImage(resampledCanvas, drawX, drawY, drawW, drawH);
   } else {
-    ctx.drawImage(imageElement, xFit, yFit, wFit, hFit);
+    ctx.drawImage(imageElement, drawX, drawY, drawW, drawH);
   }
 
   return canvas;
@@ -425,7 +464,8 @@ export function resizeImagePreview(
   clarityEngine = 'hermite',
   aiStyle = 'mirror',
   aiPrompt = '',
-  aiGeneratedImageElement = null
+  aiGeneratedImageElement = null,
+  sizingMode = 'fit'
 ) {
   let previewScale = 1;
   if (targetWidth > maxPreviewSize || targetHeight > maxPreviewSize) {
@@ -461,24 +501,64 @@ export function resizeImagePreview(
   // 1. Draw Background
   drawBackground(ctx, canvas, imageElement, pWidth, pHeight, bgType, bgColor, aiStyle, aiPrompt, aiGeneratedImageElement);
 
-  // 2. Draw Centered Contain Image
-  let fitScale;
-  if (arOrig > arTarget) {
-    fitScale = pWidth / wOrig;
+  // 2. Draw Image based on Sizing Mode
+  let drawW, drawH, drawX, drawY;
+
+  if (sizingMode === 'fill' || sizingMode === 'enlarge_to_frame') {
+    let scale;
+    if (arOrig > arTarget) {
+      scale = pHeight / hOrig;
+    } else {
+      scale = pWidth / wOrig;
+    }
+    drawW = Math.round(wOrig * scale);
+    drawH = Math.round(hOrig * scale);
+    drawX = Math.round((pWidth - drawW) / 2);
+    drawY = Math.round((pHeight - drawH) / 2);
+  } else if (sizingMode === 'stretch') {
+    drawW = pWidth;
+    drawH = pHeight;
+    drawX = 0;
+    drawY = 0;
+  } else if (sizingMode === 'background_stretch') {
+    const wOrigScaled = wOrig * previewScale;
+    const hOrigScaled = hOrig * previewScale;
+    if (wOrigScaled <= pWidth && hOrigScaled <= pHeight) {
+      drawW = Math.round(wOrigScaled);
+      drawH = Math.round(hOrigScaled);
+      drawX = Math.round((pWidth - drawW) / 2);
+      drawY = Math.round((pHeight - drawH) / 2);
+    } else {
+      let scale;
+      if (arOrig > arTarget) {
+        scale = pWidth / wOrig;
+      } else {
+        scale = pHeight / hOrig;
+      }
+      drawW = Math.round(wOrig * scale);
+      drawH = Math.round(hOrig * scale);
+      drawX = Math.round((pWidth - drawW) / 2);
+      drawY = Math.round((pHeight - drawH) / 2);
+    }
   } else {
-    fitScale = pHeight / hOrig;
+    let scale;
+    if (arOrig > arTarget) {
+      scale = pWidth / wOrig;
+    } else {
+      scale = pHeight / hOrig;
+    }
+    drawW = Math.round(wOrig * scale);
+    drawH = Math.round(hOrig * scale);
+    drawX = Math.round((pWidth - drawW) / 2);
+    drawY = Math.round((pHeight - drawH) / 2);
   }
-  const wFit = Math.round(wOrig * fitScale);
-  const hFit = Math.round(hOrig * fitScale);
-  const xFit = Math.round((pWidth - wFit) / 2);
-  const yFit = Math.round((pHeight - hFit) / 2);
 
   if (clarityEngine === 'hermite') {
     const srcCanvas = imageToCanvas(imageElement);
-    const resampledCanvas = resampleHermite(srcCanvas, wFit, hFit);
-    ctx.drawImage(resampledCanvas, xFit, yFit, wFit, hFit);
+    const resampledCanvas = resampleHermite(srcCanvas, drawW, drawH);
+    ctx.drawImage(resampledCanvas, drawX, drawY, drawW, drawH);
   } else {
-    ctx.drawImage(imageElement, xFit, yFit, wFit, hFit);
+    ctx.drawImage(imageElement, drawX, drawY, drawW, drawH);
   }
 
   return canvas;

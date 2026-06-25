@@ -1,5 +1,5 @@
 import React from 'react';
-import { Settings, Sliders, CheckSquare, Square, CheckCircle, XCircle, ShieldCheck, Cpu } from 'lucide-react';
+import { Settings, Sliders, CheckSquare, Square, CheckCircle, XCircle, ShieldCheck, Cpu, Shrink, Expand, Move, Sparkles, Maximize } from 'lucide-react';
 import { CATEGORIES } from '../constants/sizes';
 
 const COLOR_PRESETS = [
@@ -32,6 +32,8 @@ export default function Controls({
   onGenerateAiBackground,
   isGeneratingAiImage = false,
   documentMode = true,
+  sizingMode = 'fit',
+  setSizingMode,
 }) {
   return (
     <div className="w-full max-w-4xl mx-auto px-4 mb-8 transition-all duration-300">
@@ -86,6 +88,59 @@ export default function Controls({
               <div className="flex flex-col text-left">
                 <span className="text-xs font-bold text-zinc-750 dark:text-zinc-300">Ultra-Sharp Resampling Engine</span>
                 <span className="text-[10px] text-zinc-450 dark:text-zinc-500 leading-tight mt-0.5">High-fidelity Hermite curve resampling is active.</span>
+              </div>
+            </div>
+
+            {/* Sizing Mode Selection */}
+            <div className="flex flex-col gap-2 mt-2">
+              <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider block">
+                Sizing Mode
+              </label>
+              <div className="grid grid-cols-5 gap-1.5">
+                {[
+                  { id: 'fit', label: 'FIT', icon: Shrink },
+                  { id: 'fill', label: 'FILL', icon: Expand },
+                  { id: 'stretch', label: 'STRETCH', icon: Move },
+                  { id: 'background_stretch', label: 'BG STRETCH', icon: Sparkles },
+                  { id: 'enlarge_to_frame', label: 'ENLARGE', icon: Maximize },
+                ].map((mode) => {
+                  const Icon = mode.icon;
+                  const isActive = sizingMode === mode.id;
+                  return (
+                    <button
+                      key={mode.id}
+                      type="button"
+                      onClick={() => setSizingMode(mode.id)}
+                      className={`flex flex-col items-center justify-center p-2 rounded-xl border text-center transition-all cursor-pointer select-none gap-1 ${
+                        isActive
+                          ? 'bg-indigo-650/10 dark:bg-indigo-950/40 border-indigo-500 text-indigo-650 dark:text-indigo-400 shadow-sm'
+                          : 'bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
+                      }`}
+                    >
+                      <Icon className="w-4 h-4 shrink-0" />
+                      <span className="text-[9px] font-extrabold tracking-wider">{mode.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              
+              {/* Dynamic Sizing Mode Description */}
+              <div className="p-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-left mt-1">
+                <p className="text-[11px] text-zinc-650 dark:text-zinc-400 leading-normal font-medium">
+                  {
+                    sizingMode === 'fit' ? 'FIT: Scales the generated image to fit inside the selected frame dimensions while maintaining original aspect ratio. Adds padding/letterbox on the shorter sides if needed.' :
+                    sizingMode === 'fill' ? 'FILL: Scales the image to completely fill the frame. Maintains aspect ratio but crops the overflow edges. No empty space visible.' :
+                    sizingMode === 'stretch' ? 'STRETCH: Forces the image to exactly match the target width and height. Does NOT preserve aspect ratio — image may look squished or wide.' :
+                    sizingMode === 'background_stretch' ? 'BACKGROUND STRETCH: Keeps the main subject of the image centered and at its original size. Extends/outpaints the background outward to fill the new frame dimensions.' :
+                    sizingMode === 'enlarge_to_frame' ? 'ENLARGE TO FRAME: Upscales the subject/content of the image to fill the frame completely. Background is stretched or regenerated to match.' : ''
+                  }
+                </p>
+                {sizingMode === 'background_stretch' && (
+                  <p className="text-[10px] text-red-500 dark:text-red-400 font-semibold mt-1 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                    Best with landscape/portrait images that have a clear subject
+                  </p>
+                )}
               </div>
             </div>
 

@@ -15,7 +15,7 @@ export default function Header({
   onGoogleConfigClick,
 }) {
   return (
-    <header className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-5 flex flex-col md:flex-row items-center justify-between gap-5 border-b border-zinc-800/80 transition-colors duration-300">
+    <header className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-3 flex flex-col md:flex-row items-center justify-between gap-5 border-b border-zinc-800/80 transition-colors duration-300">
       
       {/* Brand Logo and Title */}
       <div className="flex items-center gap-4">

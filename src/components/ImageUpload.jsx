@@ -51,14 +51,14 @@ export default function ImageUpload({ onImageUpload }) {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 py-8">
+    <div className="w-full max-w-3xl mx-auto px-4 py-2">
       <div
         onDragEnter={handleDrag}
         onDragOver={handleDrag}
         onDragLeave={handleDrag}
         onDrop={handleDrop}
         onClick={triggerFileInput}
-        className={`relative w-full aspect-video min-h-[280px] md:min-h-[340px] rounded-3xl border-2 border-dashed flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all duration-300 group overflow-hidden ${
+        className={`relative w-full aspect-[2/1] md:aspect-[2.2/1] min-h-[220px] md:min-h-[260px] rounded-3xl border-2 border-dashed flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all duration-300 group overflow-hidden ${
           isDragActive
             ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/10 shadow-inner'
             : 'border-zinc-300 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-700 bg-white dark:bg-zinc-900/50 hover:shadow-xl hover:shadow-zinc-200/20 dark:hover:shadow-black/20'

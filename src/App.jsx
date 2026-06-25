@@ -764,7 +764,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-50 flex flex-col font-sans transition-colors duration-300 relative overflow-hidden bg-grid-tech">
+    <div className={`min-h-screen ${!file ? 'h-screen overflow-hidden' : ''} bg-zinc-950 text-zinc-50 flex flex-col font-sans transition-colors duration-300 relative overflow-hidden bg-grid-tech`}>
       {/* Ambient background glows */}
       <div className="ambient-orb ambient-orb-gold w-[350px] h-[350px] top-[10%] left-[-5%] opacity-40" />
       <div className="ambient-orb ambient-orb-purple w-[400px] h-[400px] top-[40%] right-[-10%] opacity-35" />
@@ -784,7 +784,7 @@ export default function App() {
         onGoogleConfigClick={() => setShowGoogleConfigModal(true)}
       />
 
-      <main className="flex-1 w-full flex flex-col pt-4">
+      <main className={`flex-1 w-full flex flex-col ${!file ? 'justify-center overflow-hidden' : 'pt-4'}`}>
         {/* Admin Preset Panel */}
         {user && user.role === 'admin' && showAdminPanel && file && (
           <AdminPanel
@@ -796,7 +796,7 @@ export default function App() {
         )}
         {!file ? (
           /* Upload State with Lightfall Background */
-          <div className="flex-1 w-full relative flex flex-col items-center justify-center py-10 md:py-16 overflow-hidden">
+          <div className="flex-1 w-full relative flex flex-col items-center justify-center py-2 md:py-4 overflow-hidden">
             {/* Background WebGL Animation */}
             <div className="absolute inset-0 z-0 w-full h-full pointer-events-none opacity-50">
               <Lightfall

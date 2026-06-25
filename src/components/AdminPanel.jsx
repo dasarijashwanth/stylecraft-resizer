@@ -15,8 +15,9 @@ export default function AdminPanel({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!name || !width || !height) {
-      setError('Please fill in all details.');
+    const cleanName = name.trim().replace(/<[^>]*>/g, '').slice(0, 50); // Strip HTML tags and limit to 50 chars
+    if (!cleanName || !width || !height) {
+      setError('Please fill in all details with valid values.');
       return;
     }
     const w = parseInt(width, 10);
@@ -25,10 +26,14 @@ export default function AdminPanel({
       setError('Dimensions must be positive integers.');
       return;
     }
+    if (w > 10000 || h > 10000) {
+      setError('Dimensions must not exceed 10,000 px.');
+      return;
+    }
 
     const newSize = {
       id: `custom_${Date.now()}`,
-      name,
+      name: cleanName,
       width: w,
       height: h,
       category,

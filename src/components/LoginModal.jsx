@@ -8,16 +8,27 @@ export default function LoginModal({ onLogin, onClose }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!email || !password) {
+    const cleanEmail = email.trim();
+    if (!cleanEmail || !password) {
       setError('Please fill in all fields.');
+      return;
+    }
+    if (cleanEmail.length > 80 || password.length > 80) {
+      setError('Input exceeds maximum allowed length.');
+      return;
+    }
+    // Standard email format validation regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+      setError('Please enter a valid email address.');
       return;
     }
     
     // Auth validation
-    if (email === 'admin@stylecraft.com' && password === 'admin123') {
-      onLogin({ email, role: 'admin' });
-    } else if (email === 'designer@stylecraft.com' && password === 'design123') {
-      onLogin({ email, role: 'designer' });
+    if (cleanEmail === 'admin@stylecraft.com' && password === 'admin123') {
+      onLogin({ email: cleanEmail, role: 'admin' });
+    } else if (cleanEmail === 'designer@stylecraft.com' && password === 'design123') {
+      onLogin({ email: cleanEmail, role: 'designer' });
     } else {
       setError('Invalid email or password. Use the quick-login buttons below!');
     }

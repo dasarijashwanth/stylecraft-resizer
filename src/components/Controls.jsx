@@ -225,6 +225,7 @@ export default function Controls({
                         type="text"
                         value={aiPrompt}
                         onChange={(e) => setAiPrompt(e.target.value)}
+                        maxLength={200}
                         placeholder="e.g. vintage film grain, high luxury ambient gold glow..."
                         className="flex-1 px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-zinc-250 placeholder-zinc-550 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 transition-all"
                       />

@@ -11,11 +11,22 @@ export default function GoogleClientIdModal({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!clientId.trim()) {
+    const trimmed = clientId.trim();
+    if (!trimmed) {
       setError('Please enter a valid Client ID.');
       return;
     }
-    onSave(clientId.trim());
+    if (trimmed.length > 150) {
+      setError('Client ID exceeds maximum allowed length.');
+      return;
+    }
+    // Standard Google Web Client ID structure: alphanumeric-dash.apps.googleusercontent.com
+    const clientIdRegex = /^[0-9a-zA-Z\-]+\.apps\.googleusercontent\.com$/;
+    if (!clientIdRegex.test(trimmed)) {
+      setError('Invalid Client ID format. Must end with .apps.googleusercontent.com');
+      return;
+    }
+    onSave(trimmed);
   };
 
   return (

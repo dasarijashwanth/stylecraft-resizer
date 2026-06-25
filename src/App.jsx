@@ -115,6 +115,7 @@ export default function App() {
 
   // UI Notification & Theme
   const [toast, setToast] = useState(null);
+  const [lastAiGenTime, setLastAiGenTime] = useState(0);
 
   // Google OAuth States
   const [googleAccessToken, setGoogleAccessToken] = useState('');
@@ -348,14 +349,27 @@ export default function App() {
   };
 
   const handleGenerateAiBackground = async () => {
-    if (!aiPrompt.trim()) return;
+    const cleanPrompt = aiPrompt.trim().replace(/<[^>]*>/g, '').slice(0, 200); // Sanitize and cap length
+    if (!cleanPrompt) return;
+
+    // Rate-limiting check: 5-second cooldown
+    const now = Date.now();
+    if (now - lastAiGenTime < 5000) {
+      setToast({
+        message: 'Please wait 5 seconds between AI backdrop requests.',
+        type: 'error',
+      });
+      return;
+    }
+    setLastAiGenTime(now);
+
     setIsGeneratingAiImage(true);
     setStatusMessage('Generating AI Smart Extend backdrop...');
     try {
       const img = new Image();
       img.crossOrigin = 'anonymous';
       const seed = Math.floor(Math.random() * 100000);
-      img.src = `https://image.pollinations.ai/p/${encodeURIComponent(aiPrompt)}?width=1000&height=1000&seed=${seed}&nologo=true`;
+      img.src = `https://image.pollinations.ai/p/${encodeURIComponent(cleanPrompt)}?width=1000&height=1000&seed=${seed}&nologo=true`;
       await new Promise((resolve, reject) => {
         img.onload = resolve;
         img.onerror = () => reject(new Error('Failed to load AI generated image'));

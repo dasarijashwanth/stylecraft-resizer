@@ -15,6 +15,8 @@ import LoginModal from './components/LoginModal'; // Authentication Modal
 import AdminPanel from './components/AdminPanel'; // Admin Custom Presets
 import DriveModal from './components/DriveModal'; // Google Drive cloud modal
 import GoogleClientIdModal from './components/GoogleClientIdModal'; // Google API config modal
+import Lightfall from './components/Lightfall';
+
 
 import { SIZES } from './constants/sizes';
 import {
@@ -792,18 +794,41 @@ export default function App() {
             totalResizesCount={simulatedResizesCount}
           />
         )}
-
         {!file ? (
-          /* Upload State */
-          <div className="flex-1 flex flex-col items-center justify-center py-10 md:py-16">
-            <ImageUpload onImageUpload={handleImageUpload} />
+          /* Upload State with Lightfall Background */
+          <div className="flex-1 w-full relative flex flex-col items-center justify-center py-10 md:py-16 overflow-hidden">
+            {/* Background WebGL Animation */}
+            <div className="absolute inset-0 z-0 w-full h-full pointer-events-none opacity-50">
+              <Lightfall
+                colors={['#A6C8FF', '#5227FF', '#FF9FFC']}
+                backgroundColor="#09090b"
+                speed={0.5}
+                streakCount={3}
+                streakWidth={1}
+                streakLength={1.2}
+                glow={1.2}
+                density={0.5}
+                twinkle={1}
+                zoom={2.5}
+                backgroundGlow={0.4}
+                opacity={1}
+                mouseInteraction={true}
+                mouseStrength={0.5}
+                mouseRadius={1.2}
+              />
+            </div>
             
-            {/* Copy / Privacy Guarantee */}
-            <div className="w-full max-w-2xl px-6 text-center text-xs text-zinc-400 dark:text-zinc-500 flex flex-col items-center gap-2.5 mt-4">
-              <p className="flex items-center gap-1.5 justify-center leading-relaxed">
-                <Laptop className="h-4 w-4 text-indigo-500" />
-                <span><strong>100% Client-Side Processing.</strong> Your images are processed directly in your browser. We never upload your files to any external server. Your data remains fully secure on your machine.</span>
-              </p>
+            {/* Foreground Content */}
+            <div className="relative z-10 w-full flex flex-col items-center">
+              <ImageUpload onImageUpload={handleImageUpload} />
+              
+              {/* Copy / Privacy Guarantee */}
+              <div className="w-full max-w-2xl px-6 text-center text-xs text-zinc-450 dark:text-zinc-500 flex flex-col items-center gap-2.5 mt-4 backdrop-blur-xs bg-zinc-950/20 py-2 rounded-2xl">
+                <p className="flex items-center gap-1.5 justify-center leading-relaxed">
+                  <Laptop className="h-4 w-4 text-indigo-500" />
+                  <span><strong>100% Client-Side Processing.</strong> Your images are processed directly in your browser. We never upload your files to any external server. Your data remains fully secure on your machine.</span>
+                </p>
+              </div>
             </div>
           </div>
         ) : (

@@ -369,7 +369,7 @@ export default function App() {
   };
 
   const handleGenerateAiBackground = async () => {
-    const cleanPrompt = aiPrompt.trim().replace(/<[^>]*>/g, '').slice(0, 200); // Sanitize and cap length
+    const cleanPrompt = aiPrompt.trim().replace(/<[^>]*>/g, '').slice(0, 500); // Sanitize and cap length
     if (!cleanPrompt) return;
 
     // Rate-limiting check: 5-second cooldown

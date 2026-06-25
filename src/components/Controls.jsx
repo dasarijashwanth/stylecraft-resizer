@@ -327,7 +327,7 @@ export default function Controls({
                         type="text"
                         value={aiPrompt}
                         onChange={(e) => setAiPrompt(e.target.value)}
-                        maxLength={200}
+                        maxLength={500}
                         placeholder="e.g. vintage film grain, high luxury ambient gold glow..."
                         className="flex-1 px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-zinc-250 placeholder-zinc-550 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 transition-all"
                       />
@@ -349,6 +349,8 @@ export default function Controls({
                     {/* Quick Tags presets */}
                     <div className="flex flex-wrap gap-1.5">
                       {[
+                        { label: '300 DPI Expand', prompt: 'Upscale this image to 300 DPI while preserving all original details with zero distortion. Extend and fill any empty background areas to complete the full canvas, seamlessly matching the existing background style, color, and texture. No changes to original subjects or foreground elements. Output: full bleed, 300 DPI, photorealistic quality.' },
+                        { label: 'Bg Outpaint Match', prompt: 'Extend the background only. Keep all existing content 100% identical — no changes to subjects, colors, or composition. Fill empty/transparent/cropped areas by seamlessly continuing the existing background. Match texture, grain, lighting direction, color temperature, and depth exactly. No new objects or elements. High resolution output at 300 DPI.' },
                         { label: 'Clean Studio', prompt: 'clean smooth backdrop, studio light' },
                         { label: 'Film Matte Grain', prompt: 'matte film noise, dark luxury grain' },
                         { label: 'Luxury Gilded', prompt: 'gilded golden accents, warm luxury ambient light' },

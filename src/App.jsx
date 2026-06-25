@@ -16,6 +16,7 @@ import AdminPanel from './components/AdminPanel'; // Admin Custom Presets
 import DriveModal from './components/DriveModal'; // Google Drive cloud modal
 import GoogleClientIdModal from './components/GoogleClientIdModal'; // Google API config modal
 import Lightfall from './components/Lightfall';
+import GeminiConfigModal from './components/GeminiConfigModal';
 
 
 import { SIZES } from './constants/sizes';
@@ -127,6 +128,13 @@ export default function App() {
   });
   const [showGoogleConfigModal, setShowGoogleConfigModal] = useState(false);
   const [savingToDriveIds, setSavingToDriveIds] = useState(new Set());
+
+  // Gemini AI States
+  const [aiProvider, setAiProvider] = useState('pollinations'); // 'pollinations' | 'gemini'
+  const [geminiApiKey, setGeminiApiKey] = useState(() => {
+    return localStorage.getItem('gemini_api_key') || '';
+  });
+  const [showGeminiConfigModal, setShowGeminiConfigModal] = useState(false);
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('theme');
     if (saved) return saved === 'dark';
@@ -236,6 +244,16 @@ export default function App() {
     setTimeout(() => {
       triggerGoogleLoginWithId(clientId);
     }, 100);
+  };
+
+  const handleGeminiConfigSave = (key) => {
+    localStorage.setItem('gemini_api_key', key);
+    setGeminiApiKey(key);
+    setShowGeminiConfigModal(false);
+    setToast({
+      message: 'Google Gemini API Key saved successfully!',
+      type: 'success',
+    });
   };
 
   const handleSaveToDriveSingle = async (size) => {
@@ -382,6 +400,93 @@ export default function App() {
       finalPrompt += `, scale up and enlarge main subject to fill entire ${targetDimensionsText} frame, expand background to match`;
     }
 
+    if (aiProvider === 'gemini') {
+      if (!geminiApiKey) {
+        setToast({
+          message: 'Gemini API Key is not configured. Opening settings...',
+          type: 'error',
+        });
+        setShowGeminiConfigModal(true);
+        return;
+      }
+
+      setIsGeneratingAiImage(true);
+      setStatusMessage('Querying Google Gemini (Nano Banana) outpainting engine...');
+
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${geminiApiKey}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              contents: [
+                {
+                  parts: [{ text: `Generate a background image that matches: ${finalPrompt}` }],
+                },
+              ],
+              generationConfig: {
+                responseModalities: ['TEXT', 'IMAGE'],
+                imageConfig: {
+                  aspectRatio: '1:1',
+                },
+              },
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.error?.message || `HTTP ${response.status} Error`);
+        }
+
+        const data = await response.json();
+        const candidates = data.candidates;
+        if (!candidates || candidates.length === 0) {
+          throw new Error('No candidate responses returned by Gemini API');
+        }
+
+        const parts = candidates[0].content?.parts || [];
+        const imagePart = parts.find((p) => p.inlineData);
+        if (!imagePart || !imagePart.inlineData?.data) {
+          const textPart = parts.find((p) => p.text);
+          throw new Error(
+            textPart?.text || 'No image data returned. The prompt may have triggered safety filters.'
+          );
+        }
+
+        const base64Data = imagePart.inlineData.data;
+        const mimeType = imagePart.inlineData.mimeType || 'image/png';
+
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = () => reject(new Error('Failed to load base64 image returned by Gemini API'));
+          img.src = `data:${mimeType};base64,${base64Data}`;
+        });
+
+        setAiGeneratedImageElement(img);
+        setToast({
+          message: 'Google Gemini (Nano Banana) backdrop generated!',
+          type: 'success',
+        });
+      } catch (err) {
+        console.error('Gemini backdrop generation failed:', err);
+        setToast({
+          message: `Gemini generation failed: ${err.message}`,
+          type: 'error',
+        });
+      } finally {
+        setIsGeneratingAiImage(false);
+        setStatusMessage('');
+      }
+      return;
+    }
+
+    // Default / Pollinations AI
     setIsGeneratingAiImage(true);
     setStatusMessage('Generating AI Smart Extend backdrop...');
     try {
@@ -898,6 +1003,10 @@ export default function App() {
               documentMode={documentMode}
               sizingMode={sizingMode}
               setSizingMode={setSizingMode}
+              aiProvider={aiProvider}
+              setAiProvider={setAiProvider}
+              geminiApiKey={geminiApiKey}
+              onConfigureGeminiKey={() => setShowGeminiConfigModal(true)}
             />
 
             {/* Progress indicators */}
@@ -1004,6 +1113,15 @@ export default function App() {
           initialClientId={googleClientId}
           onSave={handleGoogleConfigSave}
           onClose={() => setShowGoogleConfigModal(false)}
+        />
+      )}
+
+      {/* Google Gemini API Key Setup Modal */}
+      {showGeminiConfigModal && (
+        <GeminiConfigModal
+          initialApiKey={geminiApiKey}
+          onSave={handleGeminiConfigSave}
+          onClose={() => setShowGeminiConfigModal(false)}
         />
       )}
 

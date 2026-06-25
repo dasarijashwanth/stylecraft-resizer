@@ -34,6 +34,10 @@ export default function Controls({
   documentMode = true,
   sizingMode = 'fit',
   setSizingMode,
+  aiProvider = 'pollinations',
+  setAiProvider,
+  geminiApiKey = '',
+  onConfigureGeminiKey,
 }) {
   return (
     <div className="w-full max-w-4xl mx-auto px-4 mb-8 transition-all duration-300">
@@ -240,6 +244,49 @@ export default function Controls({
               {/* AI generator tool area */}
               {bgType === 'ai' && (
                 <div className="flex flex-col gap-3 p-3 bg-zinc-950/60 border border-indigo-950/40 rounded-2xl animate-fadeIn ai-panel-glow">
+                  {/* AI Provider Engine Switcher */}
+                  <div className="border-b border-zinc-800 pb-3 mb-2 flex items-center justify-between flex-wrap gap-2 text-left">
+                    <div>
+                      <label className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest block mb-1">
+                        AI Generator Provider
+                      </label>
+                      <div className="flex bg-zinc-900 p-0.5 rounded-lg border border-zinc-800 text-[10px] w-fit">
+                        <button
+                          type="button"
+                          onClick={() => setAiProvider('pollinations')}
+                          className={`px-3 py-1.5 rounded-md font-bold cursor-pointer transition-all ${
+                            aiProvider === 'pollinations'
+                              ? 'bg-zinc-850 text-indigo-300 shadow-sm'
+                              : 'text-zinc-500 hover:text-zinc-300'
+                          }`}
+                        >
+                          Pollinations AI (Free)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setAiProvider('gemini')}
+                          className={`px-3 py-1.5 rounded-md font-bold cursor-pointer transition-all ${
+                            aiProvider === 'gemini'
+                              ? 'bg-zinc-850 text-indigo-300 shadow-sm'
+                              : 'text-zinc-500 hover:text-zinc-300'
+                          }`}
+                        >
+                          Google Gemini (Nano Banana)
+                        </button>
+                      </div>
+                    </div>
+                    {aiProvider === 'gemini' && (
+                      <button
+                        type="button"
+                        onClick={() => onConfigureGeminiKey()}
+                        className="px-2.5 py-1.5 bg-zinc-900 border border-zinc-800 hover:border-indigo-900/60 text-zinc-400 hover:text-indigo-300 rounded-lg text-[10px] font-bold cursor-pointer transition-all flex items-center gap-1.5 select-none shrink-0"
+                      >
+                        <Settings className="w-3.5 h-3.5 text-indigo-555" />
+                        <span>{geminiApiKey ? 'Change Key' : 'Configure Key'}</span>
+                      </button>
+                    )}
+                  </div>
+
                   <div>
                     <label className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest block mb-1.5">
                       AI Backdrop Engine Style

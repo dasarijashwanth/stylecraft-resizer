@@ -1,0 +1,41 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String              @id @default(uuid())
+  name          String
+  email         String              @unique
+  passwordHash  String?             // Null for Google login
+  googleUid     String?             // Null for email login
+  avatarUrl     String?
+  role          String              @default("user") // "admin" | "user"
+  isVerified    Boolean             @default(false)
+  createdAt     DateTime            @default(now())
+  lastLogin     DateTime?
+  loginMethod   String              // "email" | "google"
+  tokens        VerificationToken[]
+}
+
+model VerificationToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+}
+
+model LoginAttempt {
+  id        String   @id @default(uuid())
+  email     String
+  ipAddress String
+  timestamp DateTime @default(now())
+}
